@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.Zackeus.WeChat_YuLon.modules.wechat.dao.WeChatDao">
+
+    <sql id="wechatUserColumns">
+    	[OPEN_ID],
+    	[USER_ID],
+    	[UNION_ID],
+    	[NAME],
+    	[ID_CARD],
+    	[PHONE_NUM],
+    	[NICK_NAME],
+    	[AVATAR_URL],
+    	[GENDER],
+    	[COUNTRY],
+    	[PROVINCE],
+    	[CITY],
+    	[LANGUAGE],
+      	[CREATE_DATE],
+      	[UPDATE_DATE],
+      	[REMARKS]
+    </sql>
+    
+    <sql id="weChatRegisterColumns">
+        [OPEN_ID],
+    	[NAME],
+    	[ID_CARD],
+    	[PHONE_NUM]
+    </sql>
+
+	<resultMap type="WeChatUser" id="weChatUserResultMap">
+		<id property="openId" column="OPEN_ID" />
+		<association property="weChatRegister" column="OPEN_ID" select="getWeChatRegisterByOpenId"/>
+	</resultMap>
+	
+	<resultMap type="WeChatRegister" id="weChatRegisterResultMap">
+		<id property="openId" column="OPEN_ID" />
+		<collection property="externalContractNbrs" column="OPEN_ID" select="getExternalContractNbrsByOpenId" />
+	</resultMap>
+	
+	<!-- 据微信OpenId查询用户 -->
+	<select id="getByOpenId" resultMap="weChatUserResultMap">
+		SELECT
+		<include refid="wechatUserColumns"/>
+		FROM [WeChat].[dbo].[WECHAT_USER] WC
+		WHERE WC.[OPEN_ID] = #{openId}
+	</select>
+	
+	<!-- 据微信OpenId查询用户 真实信息-->
+	<select id="getWeChatRegisterByOpenId" resultMap="weChatRegisterResultMap">
+		SELECT
+		<include refid="weChatRegisterColumns"/>
+		FROM [WeChat].[dbo].[WECHAT_USER]
+		WHERE [OPEN_ID] = #{openId}
+	</select>
+	
+	<!-- 根据openId查询合同列表 -->
+	<select id="getExternalContractNbrsByOpenId" resultType="string">
+		SELECT 
+			EXTERNAL_CONTRACT_NBR 
+		FROM [WeChat].[dbo].[WECHAT_CONTRACT]
+		WHERE [OPEN_ID] = #{openId}
+	</select>
+
+	<!-- 查询符合核实身份信息的合同号 -->
+	<select id="getExternalContractNbrs" resultType="string">
+		SELECT DISTINCT MCT.[EXTERNAL_CONTRACT_NBR]
+		FROM [10.5.60.90].[FinanceCopy].[dbo].[MIS_CONTRACT_DETAIL] MCT
+		LEFT JOIN [10.5.60.90].[FinanceCopy].[dbo].[MIS_CUSTOMER_DETAIL] MCR ON MCT.[PROPOSAL_NBR] = MCR.[APPLICATION_NUMBER]
+		WHERE MCR.[EXP_APPLICANT_CARD_ID] = #{idCard}
+		AND MCR.[EXP_APPLICANT_NAME] = #{name}
+		AND MCR.[PHONE_NUMBER] = #{phoneNum}
+	</select>
+	
+	<!-- 注册用户 -->
+	<insert id="insert">
+		INSERT INTO [WeChat].[dbo].[WECHAT_USER]
+		(<include refid="wechatUserColumns"/>)
+		VALUES(	
+			#{openId},
+			#{userId},
+			#{unionId},
+			#{weChatRegister.name},
+			#{weChatRegister.idCard},
+			#{weChatRegister.phoneNum},
+			#{nickName},
+			#{avatarUrl},
+			#{gender},
+			#{country},
+			#{province},
+			#{city},
+			#{language},
+			#{createDate},
+			#{updateDate},
+			#{remarks})
+	</insert>
+	
+	<!-- 注册用户合同信息列表 -->
+	<insert id="insertContractNbrs">
+		INSERT INTO
+		[WeChat].[dbo].[WECHAT_CONTRACT] (
+			[OPEN_ID],[EXTERNAL_CONTRACT_NBR]
+		) VALUES
+		<foreach collection = "externalContractNbrs" index="index" item="externalContractNbr" separator = ",">
+            (
+      			#{openId},#{externalContractNbr}
+      		)
+        </foreach>
+	</insert>
+	
+</mapper>  

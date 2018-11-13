@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans    
+                        http://www.springframework.org/schema/beans/spring-beans-3.1.xsd    
+                        http://www.springframework.org/schema/context    
+                        http://www.springframework.org/schema/context/spring-context-3.1.xsd    
+                        http://www.springframework.org/schema/mvc    
+                        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+                        
+    <!-- 使用Annotation自动注册Bean,只扫描@Controller -->
+	<context:component-scan base-package="com.Zackeus.WeChat_YuLon" use-default-filters="false">
+		<!-- base-package 如果多个，用“,”分隔 -->
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+                        
+    <!-- 启动注解驱动的Spring MVC功能，注册请求url和注解POJO类方法的映射 validator="validator"注入了校验器 -->            
+    <mvc:annotation-driven validator="validator">
+    	<!-- 注入自定义的参数解析器 -->
+    	<mvc:argument-resolvers>
+        	<bean class="com.Zackeus.WeChat_YuLon.common.annotation.argumentResolver.PageRequestBody.PageRequestBodyArgumentResolver"/>
+        	<bean class="com.Zackeus.WeChat_YuLon.common.annotation.argumentResolver.RequestAttribute.RequestAttributeArgumentResolver"/>
+    	</mvc:argument-resolvers>
+    	<mvc:message-converters register-defaults="true">
+    		<!-- 将StringHttpMessageConverter的默认编码设为UTF-8 -->
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+		    	<constructor-arg value="UTF-8" />
+			</bean>
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>text/html;charset=UTF-8</value>
+						<!-- 注意 这是传输json格式，无论是ajax还是外部接口传输 -->
+						<value>application/json;charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+    	</mvc:message-converters>
+    </mvc:annotation-driven>
+	<!-- 对静态资源文件的访问， 将无法mapping到Controller的path交给default servlet handler处理 -->
+	<mvc:default-servlet-handler />
+	<!-- 静态资源映射 -->
+    <mvc:resources mapping="/static/**" location="/static/" cache-period="31536000"/>
+	
+	<!-- 定义跳转的文件的前后缀 ，视图模式配置 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<!-- 这里的配置我的理解是自动给后面action的方法return的字符串加上前缀和后缀，变成一个 可用的url地址 -->
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	
+	<!-- 配置文件上传，如果没有使用文件上传可以不用配置，当然如果不配，那么配置文件中也不必引入上传组件包 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 默认编码 -->
+		<property name="defaultEncoding" value="utf-8" />
+		<!-- 文件大小最大值 -->
+		<property name="maxUploadSize" value="10485760000" />
+		<!-- 内存中的最大值 -->
+		<property name="maxInMemorySize" value="40960" />
+	</bean>
+	
+	<!-- 支持Shiro对Controller的方法级AOP安全控制 begin 此段必须放在 spring-mvc 下，不然会出现 shiro 权限、角色注解无效 -->
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor">
+		<property name="proxyTargetClass" value="true" />
+	</bean>
+	<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+    	<property name="securityManager" ref="securityManager"/>
+	</bean>
+	
+	<!-- bean级别的校验 方法中的参数bean必须添加@Valid注解，后面紧跟着BindingResult result参数-->
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+        <property name="providerClass" value="org.hibernate.validator.HibernateValidator" />
+        <!-- 如果不加默认到 使用classpath下的 ValidationMessages.properties -->
+   		<property name="validationMessageSource" ref="messageSource" />
+    </bean>
+	<!-- 方法级别的校验  要校验的方法所在类必须添加@Validated注解 -->
+    <bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor">
+        <!-- 可以引用自己的 validator 配置，在本文中（下面）可以找到 validator 的参考配置，如果不指定则系统使用默认的 -->
+        <property name="validator" ref="validator" />
+    </bean>
+    <!-- 校验错误信息配置文件 -->
+    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+   		<!-- 资源文件名-->
+   		<property name="basenames">
+   			<list>
+   				<value>classpath:properties/validMessage</value>
+   			</list>
+   		</property>
+   		<!-- 资源文件编码格式 -->
+   		<property name="defaultEncoding" value="UTF-8"/>
+   		<!-- 对资源文件内容缓存时间，单位秒 -->
+   		<property name="cacheSeconds" value="60"/>
+	</bean>
+	
+</beans> 

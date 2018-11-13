@@ -1,0 +1,1 @@
+<script type="text/javascript" src="${ctxStatic}/js/cache.js"></script>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:cache="http://www.springframework.org/schema/cache"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.3.xsd
+        http://www.springframework.org/schema/cache 
+       	http://www.springframework.org/schema/cache/spring-cache-3.1.xsd">
+
+	<description>Shiro Configuration</description>
+    
+    <!-- shiro filter -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!-- 安全管理器必须的 -->
+        <property name="securityManager" ref="securityManager"/>
+        <!-- 身份认证失败   认证提交的地址 -->
+        <property name="loginUrl" value="/sys/login"/>
+        <!-- 登录成功默认跳转页面，不配置则跳转至”/”。如果登陆前点击的一个需要登录的页面，则在登录自动跳转到那个需要登录的页面。不跳转到此 -->
+        <property name="successUrl" value="/sys/loginSuccess"/>
+        <!-- Shiro连接约束配置,即过滤链的定义 -->
+        <property name="filterChainDefinitions">
+            <value>
+                <!-- 对静态资源设置匿名访问 -->
+                /static/** = anon
+                /wechat/sys/verify = anon
+                /wechat/sys/** = wechat
+                /sys/login = authc <!-- 未登录请求拦截 -->
+                /** = user
+            </value>
+        </property>
+        <!-- 自定义filter -->
+        <property name="filters">
+            <map>
+                <entry key="authc" value-ref="formAuthenticationFilter"/>
+                <entry key="wechat" value-ref="wechatSysFilter"/>
+            </map>
+        </property>
+    </bean>
+    <!-- 定义扩展的filter实例 -->
+	<bean id="formAuthenticationFilter" class="com.Zackeus.WeChat_YuLon.modules.sys.security.LoginAuthenticationFilter">
+		<!-- 自定义登录表单参数 -->
+        <property name="usernameParam" value="userName"/>
+        <property name="passwordParam" value="passWord"/>
+        <property name="rememberMeParam" value="rememberMe"/>
+	</bean>
+	<bean id="wechatSysFilter" class="com.Zackeus.WeChat_YuLon.modules.wechat.security.WechatSysFilter"/>
+    
+    <!-- 安全管理器  ref对象-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="custom_Realm"/>
+        <!-- 配置sessionListener -->  
+        <property name="sessionManager" ref="sessionManager" />
+        <!-- 配置记住我管理器 -->  
+        <property name="rememberMeManager" ref="rememberMeManager" />
+        <!-- 配置缓存管理器 -->
+        <property name="cacheManager" ref="shiroCacheManager"/>
+    </bean>
+    
+	<!-- 会话管理器 -->  
+    <bean id="sessionManager" class="com.Zackeus.WeChat_YuLon.common.security.MySessionManager">
+    	<property name="sessionDAO" ref="sessionDAO"/>
+        <property name="sessionListeners" ref="sessionListener" />
+        <!-- 定义的是全局的session会话超时时间，此操作会覆盖web.xml文件中的超时时间配置 3600000 -->
+        <property name="globalSessionTimeout" value="3600000"/>
+        <!-- 删除所有无效的Session对象，此时的session被保存在了内存里面 -->
+        <property name="deleteInvalidSessions" value="true"/>
+        <!-- 设置session的失效扫描间隔，单位为毫秒 3600000 -->
+        <property name="sessionValidationInterval" value="1800000"/>
+        <!-- 会话Cookie模板  -->
+        <property name="sessionIdCookie" ref="sessionIdCookie"/>
+        <!-- 定时清理失效会话, 清理用户直接关闭浏览器造成的孤立会话   -->
+        <property name="sessionValidationSchedulerEnabled" value="true"/>
+    </bean>
+	
+	<!-- 会话Cookie模板，使用sid存储sessionid -->  
+	<bean id="sessionIdCookie" class="org.apache.shiro.web.servlet.SimpleCookie">  
+	    <constructor-arg value="sid"/>  
+	    <property name="httpOnly" value="true"/>  
+	    <property name="maxAge" value="180000"/>  
+	</bean>
+	<!-- 会话DAO -->
+    <bean id="sessionDAO" class="org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO">
+		<property name="activeSessionsCacheName" value="activeSessionsCache"/>
+    	<property name="sessionIdGenerator" ref="sessionIdGenerator"/>
+    	<property name="cacheManager" ref="shiroCacheManager" />
+    </bean>
+    <!-- 会话ID生成器 -->
+    <bean id="sessionIdGenerator" class="org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator"/>
+    <bean id="sessionListener" class="com.Zackeus.WeChat_YuLon.common.security.SessionListener"/>
+    
+    <!-- 记住我管理器， authc 的 filter 不能使用 rememberMe 功能 -->
+    <bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+    	<!-- cipherKey 是加密rememberMe Cookie的密钥;默认AES算法-->
+    	<property name="cipherKey" value="#{T(org.apache.shiro.codec.Base64).decode('4AvVhmFLUs0KTA3Kprsdag==')}"/>
+    	<!-- 记住我功能的 cookie -->
+		<property name="cookie" ref="rememberMeCookie"/>  
+    </bean>
+    <!-- 记住我 cookie -->
+    <bean id="rememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+    	<!-- cookie 的名称 -->
+    	<constructor-arg value="rememberMe"/>
+    	<property name="path" value="/"/>
+    	<property name="httpOnly" value="true"/>
+    	<!-- 30天 (单位：秒)--> 
+    	<property name="maxAge" value="2592000"/>
+	</bean>
+    
+    <!-- 自定义域realm -->
+    <bean id="custom_Realm" class="com.Zackeus.WeChat_YuLon.modules.sys.security.LoginCustomRealm">
+    	<!-- 密码匹配器注入到自定义 Realm 的属性中去 -->
+		<property name="credentialsMatcher" ref="credentialsMatcher"/>
+        <!-- 将自定义的权限匹配器注入到自定义 Realm 中 -->
+		<!-- <property name="permissionResolver" ref="permissionResolver"/> -->
+
+        <!-- 配置缓存相关 -->
+        <!-- 启用缓存 -->
+        <property name="cachingEnabled" value="true"/>
+		<!-- 开启授权缓存 -->
+        <property name="authorizationCachingEnabled" value="true"/>
+		<!-- 指定授权缓存的名字(与 ehcache.xml 中声明的相同) -->
+        <property name="authorizationCacheName" value="authorizationCache"/>
+    </bean>
+    <!-- 密码匹配器 -->
+    <bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+        <property name="hashAlgorithmName" value="SHA-1" />
+        <property name="hashIterations" value="1024" />
+        <!-- 是否存储散列后的密码为16进制，需要和生成密码时的一样 -->
+        <property name="storedCredentialsHexEncoded" value="true" />
+    </bean>
+    
+    <!-- 开启spring缓存 -->
+    <cache:annotation-driven cache-manager="cacheManager" />  
+	<!-- Spring缓存管理器 -->  
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">  
+        <property name="cacheManager" ref="ehcache"></property>  
+    </bean>
+    <!-- Shiro缓存管理器 -->  
+	<bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">  
+        <property name="cacheManager" ref="ehcache"/>
+    </bean>
+    <!-- 缓存参数配置文件扫描 -->
+    <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">  
+        <property name="configLocation" value="classpath:shiro-ehcache.xml"></property>  
+    </bean>  
+    
+    <!-- Shiro生命周期处理器 -->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+    
+</beans>
