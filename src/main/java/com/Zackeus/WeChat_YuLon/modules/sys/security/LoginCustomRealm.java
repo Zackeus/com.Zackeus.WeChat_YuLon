@@ -18,6 +18,7 @@ import com.Zackeus.WeChat_YuLon.common.utils.Encodes;
 import com.Zackeus.WeChat_YuLon.common.utils.JsonMapper;
 import com.Zackeus.WeChat_YuLon.common.utils.Logs;
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
+import com.Zackeus.WeChat_YuLon.common.utils.StringUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 import com.Zackeus.WeChat_YuLon.modules.sys.entity.Principal;
 import com.Zackeus.WeChat_YuLon.modules.sys.entity.User;
@@ -95,8 +96,10 @@ public class LoginCustomRealm extends AuthorizingRealm {
     	Principal principal = UserUtils.getPrincipal();
 		if (ObjectUtils.isNotEmpty(principal)) {
 			SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
-			// 添加用户权限
-			info.addStringPermission("user");
+			if (StringUtils.isNotBlank(principal.getId()))
+				info.addStringPermission("userser");
+			if (StringUtils.isNotBlank(principal.getOpenId()))
+				info.addStringPermission("wechatUser");
 			return info;
 		} else {
 			return null;
