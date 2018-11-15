@@ -28,9 +28,10 @@ import com.Zackeus.WeChat_YuLon.common.utils.StringUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.WXUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 import com.Zackeus.WeChat_YuLon.common.web.BaseHttpController;
+import com.Zackeus.WeChat_YuLon.modules.wechat.entity.OrderDetail;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatRegister;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;
-import com.Zackeus.WeChat_YuLon.modules.wechat.service.WeChatService;
+import com.Zackeus.WeChat_YuLon.modules.wechat.service.WeChatLoginService;
 
 /**
  * 
@@ -45,7 +46,7 @@ import com.Zackeus.WeChat_YuLon.modules.wechat.service.WeChatService;
 public class WeChatLoginController extends BaseHttpController {
 
 	@Autowired
-	WeChatService weChatService;
+	WeChatLoginService weChatService;
 
 	@Autowired
 	MsgConfig msgConfig;
@@ -62,13 +63,13 @@ public class WeChatLoginController extends BaseHttpController {
 	public void verify(@Validated({ Default.class }) @RequestBody WeChatRegister weChatRegister, HttpSession session,
 			HttpServletRequest request, HttpServletResponse response) {
 
-		weChatRegister.setName("周蓉");
-		weChatRegister.setIdCard("421023198310022468");
-		weChatRegister.setPhoneNum("13989457210");
+		weChatRegister.setName("蔡海卫");
+		weChatRegister.setIdCard("130424198609182616");
+		weChatRegister.setPhoneNum("17331066367");
 
 		// 根据待核实身份信息查询符合的合同号列表
-		List<String> externalContractNbrs = weChatService.getExternalContractNbrs(weChatRegister);
-		AssertUtil.isTrue(ObjectUtils.isNotEmpty(externalContractNbrs), HttpStatus.WE_CHAT_REGISTERED_FAIL,
+		List<OrderDetail> orderDetails = weChatService.getOrderDetails(weChatRegister);
+		AssertUtil.isTrue(ObjectUtils.isNotEmpty(orderDetails), HttpStatus.WE_CHAT_REGISTERED_FAIL,
 				"此身份信息无法识别.");
 
 		WeChatUser weChatUser = weChatService.code2Session(weChatRegister.getCode());
@@ -97,7 +98,7 @@ public class WeChatLoginController extends BaseHttpController {
 		// JSON.parseObject(httpClientResult.getContent()).getIntValue("Code"),
 		// httpClientResult.getCode(), "发送验证码失败，请重试.");
 
-		weChatRegister.setExternalContractNbrs(externalContractNbrs);
+		weChatRegister.setOrderDetails(orderDetails);
 		weChatRegister.setSmsCode(smsCode);
 		weChatRegister.setSmsTime(Calendar.getInstance().getTimeInMillis());
 		weChatUser.setWeChatRegister(weChatRegister);

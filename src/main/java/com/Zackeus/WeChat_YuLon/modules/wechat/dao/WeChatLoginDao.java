@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.Zackeus.WeChat_YuLon.common.annotation.MyBatisDao;
 import com.Zackeus.WeChat_YuLon.common.dao.CrudDao;
+import com.Zackeus.WeChat_YuLon.modules.wechat.entity.OrderDetail;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatRegister;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;
 
@@ -19,12 +20,12 @@ import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;
  * @date 2018年11月9日 下午1:59:21
  */
 @MyBatisDao
-public interface WeChatDao extends CrudDao<WeChatUser> {
+public interface WeChatLoginDao extends CrudDao<WeChatUser> {
 	
 	public WeChatUser getByOpenId(WeChatUser weChatUser);
 	
-	public List<String> getExternalContractNbrs(WeChatRegister weChatRegister);
+	public List<OrderDetail> getOrderDetails(WeChatRegister weChatRegister);
 	
-	public void insertContractNbrs(@Param("openId") String openId, @Param("externalContractNbrs") List<String> externalContractNbrs);
+	public void insertSimpleOrderDetails(@Param("openId") String openId, @Param("orderDetails") List<OrderDetail> orderDetails);
 	
 }

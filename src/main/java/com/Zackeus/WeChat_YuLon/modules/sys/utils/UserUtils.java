@@ -16,7 +16,7 @@ import com.Zackeus.WeChat_YuLon.modules.sys.entity.Principal;
 import com.Zackeus.WeChat_YuLon.modules.sys.entity.User;
 import com.Zackeus.WeChat_YuLon.modules.sys.service.UserService;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;
-import com.Zackeus.WeChat_YuLon.modules.wechat.service.WeChatService;
+import com.Zackeus.WeChat_YuLon.modules.wechat.service.WeChatLoginService;
 
 
 /**
@@ -34,7 +34,7 @@ public class UserUtils {
 	private UserService userService;
 	
 	@Autowired
-	private WeChatService weChatService;
+	private WeChatLoginService weChatService;
 	
 	@Autowired
 	private MySessionManager mySessionManager;

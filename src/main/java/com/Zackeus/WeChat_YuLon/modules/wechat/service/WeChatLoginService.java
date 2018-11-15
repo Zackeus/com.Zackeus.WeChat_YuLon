@@ -12,7 +12,8 @@ import com.Zackeus.WeChat_YuLon.common.service.CrudService;
 import com.Zackeus.WeChat_YuLon.common.utils.Logs;
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpClientUtil;
-import com.Zackeus.WeChat_YuLon.modules.wechat.dao.WeChatDao;
+import com.Zackeus.WeChat_YuLon.modules.wechat.dao.WeChatLoginDao;
+import com.Zackeus.WeChat_YuLon.modules.wechat.entity.OrderDetail;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatRegister;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;
 import com.alibaba.fastjson.JSON;
@@ -27,7 +28,7 @@ import com.alibaba.fastjson.JSONObject;
  * @date 2018年11月7日 下午3:04:31
  */
 @Service("wechatService")
-public class WeChatService extends CrudService<WeChatDao, WeChatUser> {
+public class WeChatLoginService extends CrudService<WeChatLoginDao, WeChatUser> {
 	
 	@Autowired
 	private WeChatConfig weChatConfig;
@@ -72,15 +73,14 @@ public class WeChatService extends CrudService<WeChatDao, WeChatUser> {
 	/**
 	 * 
 	 * @Title：getExternalContractNbrs
-	 * @Description: TODO(查询符合核实身份信息的合同号)
+	 * @Description: TODO(查询符合核实身份信息的合同列表)
 	 * @see：
 	 * @param weChatUser
 	 * @return
 	 */
-	public List<String> getExternalContractNbrs(WeChatRegister weChatRegister) {
-		return dao.getExternalContractNbrs(weChatRegister);
+	public List<OrderDetail> getOrderDetails(WeChatRegister weChatRegister) {
+		return dao.getOrderDetails(weChatRegister);
 	}
-	
 
 	/**
 	 * 
@@ -93,8 +93,8 @@ public class WeChatService extends CrudService<WeChatDao, WeChatUser> {
 	public void registerWechatUser(WeChatUser weChatUser) {
 		weChatUser.setIsNewRecord(Boolean.TRUE);
 		save(weChatUser);
-		if (ObjectUtils.isNotEmpty(weChatUser.getWeChatRegister().getExternalContractNbrs()))
-			dao.insertContractNbrs(weChatUser.getOpenId(), weChatUser.getWeChatRegister().getExternalContractNbrs());
+		if (ObjectUtils.isNotEmpty(weChatUser.getWeChatRegister().getOrderDetails()))
+			dao.insertSimpleOrderDetails(weChatUser.getOpenId(), weChatUser.getWeChatRegister().getOrderDetails());
 	}
 
 }

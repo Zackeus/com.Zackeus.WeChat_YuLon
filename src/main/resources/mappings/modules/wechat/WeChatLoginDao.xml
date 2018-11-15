@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>  
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.Zackeus.WeChat_YuLon.modules.wechat.dao.WeChatDao">
+<mapper namespace="com.Zackeus.WeChat_YuLon.modules.wechat.dao.WeChatLoginDao">
 
     <sql id="wechatUserColumns">
     	[OPEN_ID],
@@ -35,7 +35,7 @@
 	
 	<resultMap type="WeChatRegister" id="weChatRegisterResultMap">
 		<id property="openId" column="OPEN_ID" />
-		<collection property="externalContractNbrs" column="OPEN_ID" select="getExternalContractNbrsByOpenId" />
+		<collection property="orderDetails" column="OPEN_ID" select="getOrderDetailsByOpenId" />
 	</resultMap>
 	
 	<!-- 据微信OpenId查询用户 -->
@@ -54,19 +54,24 @@
 		WHERE [OPEN_ID] = #{openId}
 	</select>
 	
-	<!-- 根据openId查询合同列表 -->
-	<select id="getExternalContractNbrsByOpenId" resultType="string">
+	<!-- 根据openId查询简单合同列表明细 -->
+	<select id="getOrderDetailsByOpenId" resultType="OrderDetail">
 		SELECT 
-			EXTERNAL_CONTRACT_NBR 
+			[OPEN_ID],
+			[EXTERNAL_CONTRACT_NBR],
+			[ASSET_BRAND_DSC]
 		FROM [WeChat].[dbo].[WECHAT_CONTRACT]
 		WHERE [OPEN_ID] = #{openId}
 	</select>
 
 	<!-- 查询符合核实身份信息的合同号 -->
-	<select id="getExternalContractNbrs" resultType="string">
-		SELECT DISTINCT MCT.[EXTERNAL_CONTRACT_NBR]
+	<select id="getOrderDetails" resultType="OrderDetail">
+		SELECT 
+			MCT.[EXTERNAL_CONTRACT_NBR],
+			MND.[ASSET_BRAND_DSC]
 		FROM [10.5.60.90].[FinanceCopy].[dbo].[MIS_CONTRACT_DETAIL] MCT
 		LEFT JOIN [10.5.60.90].[FinanceCopy].[dbo].[MIS_CUSTOMER_DETAIL] MCR ON MCT.[PROPOSAL_NBR] = MCR.[APPLICATION_NUMBER]
+		LEFT JOIN [10.5.60.90].[FinanceCopy].[dbo].[MIS_APPLICATION_DETAIL] MND ON MCT.[PROPOSAL_NBR] = MND.[APPLICATION_NUMBER]
 		WHERE MCR.[EXP_APPLICANT_CARD_ID] = #{idCard}
 		AND MCR.[EXP_APPLICANT_NAME] = #{name}
 		AND MCR.[PHONE_NUMBER] = #{phoneNum}
@@ -96,14 +101,18 @@
 	</insert>
 	
 	<!-- 注册用户合同信息列表 -->
-	<insert id="insertContractNbrs">
+	<insert id="insertSimpleOrderDetails">
 		INSERT INTO
 		[WeChat].[dbo].[WECHAT_CONTRACT] (
-			[OPEN_ID],[EXTERNAL_CONTRACT_NBR]
+			[OPEN_ID],
+			[EXTERNAL_CONTRACT_NBR],
+			[ASSET_BRAND_DSC]
 		) VALUES
-		<foreach collection = "externalContractNbrs" index="index" item="externalContractNbr" separator = ",">
+		<foreach collection = "orderDetails" index="index" item="orderDetail" separator = ",">
             (
-      			#{openId},#{externalContractNbr}
+      			#{openId},
+      			#{orderDetail.externalContractNbr},
+      			#{orderDetail.assetBrandDsc}
       		)
         </foreach>
 	</insert>

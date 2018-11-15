@@ -45,7 +45,7 @@ public class WeChatRegister implements Serializable {
 	@PhoneNum
 	private String phoneNum; 					// 用户手机号
 	
-	private List<String> externalContractNbrs; 	// 用户绑定的合同号
+	private List<OrderDetail> orderDetails; 	// 用户绑定的合同
 	
 	@NotBlank(message = "{weChatRegister.registerData.NotBlank}")
 	private String code; 						// 微信用户登录凭证
@@ -65,6 +65,21 @@ public class WeChatRegister implements Serializable {
 		super();
 	}
 	
+	public WeChatRegister(String openId, String name, String idCard, String phoneNum, List<OrderDetail> orderDetails,
+			String code, String encryptedData, String iv, String smsCode, long smsTime) {
+		super();
+		this.openId = openId;
+		this.name = name;
+		this.idCard = idCard;
+		this.phoneNum = phoneNum;
+		this.orderDetails = orderDetails;
+		this.code = code;
+		this.encryptedData = encryptedData;
+		this.iv = iv;
+		this.smsCode = smsCode;
+		this.smsTime = smsTime;
+	}
+
 	public String getSmsCode() {
 		return smsCode;
 	}
@@ -112,13 +127,13 @@ public class WeChatRegister implements Serializable {
 	public void setPhoneNum(String phoneNum) {
 		this.phoneNum = phoneNum;
 	}
-
-	public List<String> getExternalContractNbrs() {
-		return externalContractNbrs;
+	
+	public List<OrderDetail> getOrderDetails() {
+		return orderDetails;
 	}
 
-	public void setExternalContractNbrs(List<String> externalContractNbrs) {
-		this.externalContractNbrs = externalContractNbrs;
+	public void setOrderDetails(List<OrderDetail> orderDetails) {
+		this.orderDetails = orderDetails;
 	}
 
 	public String getCode() {

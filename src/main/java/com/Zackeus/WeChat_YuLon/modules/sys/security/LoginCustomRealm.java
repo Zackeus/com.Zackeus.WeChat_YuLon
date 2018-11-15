@@ -25,7 +25,7 @@ import com.Zackeus.WeChat_YuLon.modules.sys.entity.User;
 import com.Zackeus.WeChat_YuLon.modules.sys.service.SystemService;
 import com.Zackeus.WeChat_YuLon.modules.sys.utils.UserUtils;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;
-import com.Zackeus.WeChat_YuLon.modules.wechat.service.WeChatService;
+import com.Zackeus.WeChat_YuLon.modules.wechat.service.WeChatLoginService;
 
 
 /**
@@ -42,7 +42,7 @@ public class LoginCustomRealm extends AuthorizingRealm {
 	SystemService systemService;
 	
 	@Autowired
-	WeChatService weChatService;
+	WeChatLoginService weChatService;
 	
 	 /** 
      * 登陆认证
