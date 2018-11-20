@@ -61,8 +61,6 @@ public class HttpClientUtil {
 	// 请求获取数据的超时时间(即响应时间)，单位毫秒。
 	public static final int SOCKET_TIMEOUT = 6000;
 
-	public static final String PARAM_MAP = "Map";
-	public static final String PARAM_JSON = "Json";
 	public static final String HEAD_HTTP = "http";
 	public static final String HEAD_HTTPS = "https";
 	
@@ -148,6 +146,20 @@ public class HttpClientUtil {
 	public static HttpClientResult doPost(String url) throws Exception {
 		return doPost(url, null, null, null);
 	}
+	
+	/**
+	 * 
+	 * @Title：doPostXml
+	 * @Description: TODO(发送post请求：xml字符数据)
+	 * @see：
+	 * @param url
+	 * @param xmlData
+	 * @return
+	 * @throws Exception
+	 */
+	public static HttpClientResult doPostXml(String url, String xmlData) throws Exception {
+		return doPost(url, null, xmlData, HttpType.XML);
+	}
 
 	/**
 	 * 
@@ -159,7 +171,7 @@ public class HttpClientUtil {
 	 * @throws Exception
 	 */
 	public static HttpClientResult doPostMap(String url, Map<String, Object> params) throws Exception {
-		return doPost(url, null, params, PARAM_MAP);
+		return doPost(url, null, params, HttpType.MAP);
 	}
 	
 	/**
@@ -172,7 +184,7 @@ public class HttpClientUtil {
 	 * @throws Exception
 	 */
 	public static HttpClientResult doPostJson(String url, Object params) throws Exception {
-		return doPost(url, null, params, PARAM_JSON);
+		return doPost(url, null, params, HttpType.JSON);
 	}
 	
 	/**
@@ -187,7 +199,7 @@ public class HttpClientUtil {
 	 * @throws Exception
 	 */
 	public static HttpClientResult doPostJson(String url,Map<String, String> headers, Object params) throws Exception {
-		return doPost(url, headers, params, PARAM_JSON);
+		return doPost(url, headers, params, HttpType.JSON);
 	}
 	
 	/**
@@ -202,7 +214,7 @@ public class HttpClientUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static HttpClientResult doPost(String url, Map<String, String> headers, Object params, String paramType)
+	public static HttpClientResult doPost(String url, Map<String, String> headers, Object params, HttpType paramType)
 			throws Exception {
 		CloseableHttpClient httpClient = getHttpClient(url);
 		HttpPost httpPost = new HttpPost(url);
@@ -250,7 +262,7 @@ public class HttpClientUtil {
 	 * @throws Exception
 	 */
 	public static HttpClientResult doPutMap(String url, Map<String, Object> params) throws Exception {
-		return doPut(url, params, PARAM_MAP);
+		return doPut(url, params, HttpType.MAP);
 	}
 
 	/**
@@ -263,7 +275,7 @@ public class HttpClientUtil {
 	 * @throws Exception
 	 */
 	public static HttpClientResult doPutJson(String url, Object params) throws Exception {
-		return doPut(url, params, PARAM_JSON);
+		return doPut(url, params, HttpType.JSON);
 	}
 
 	/**
@@ -275,7 +287,7 @@ public class HttpClientUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static HttpClientResult doPut(String url, Object params, String paramType) throws Exception {
+	public static HttpClientResult doPut(String url, Object params, HttpType paramType) throws Exception {
 		CloseableHttpClient httpClient = getHttpClient(url);
 		HttpPut httpPut = new HttpPut(url);
 		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(CONNECT_TIMEOUT)
@@ -425,12 +437,20 @@ public class HttpClientUtil {
 	 * @param httpMethod
 	 * @throws Exception 
 	 */
-	public static void packageParam(Object params, HttpEntityEnclosingRequestBase httpMethod, String paramType)
+	public static void packageParam(Object params, HttpEntityEnclosingRequestBase httpMethod, HttpType paramType)
 			throws Exception {
 		if (!ObjectUtils.isEmpty(params)) {
 			switch (paramType) {
 
-			case PARAM_MAP:
+			case XML:
+				// XML数据
+				StringEntity xmlEntity = new StringEntity(String.valueOf(params), WebUtils.UTF_ENCODING);
+				xmlEntity.setContentEncoding(WebUtils.UTF_ENCODING);
+				xmlEntity.setContentType(MediaType.TEXT_XML);
+				httpMethod.setEntity(xmlEntity);
+				break;
+			
+			case MAP:
 				// Map数据
 				List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 				Set<Entry<String, Object>> entrySet = ObjectUtils.objectToMap(params)
@@ -442,7 +462,7 @@ public class HttpClientUtil {
 				httpMethod.setEntity(new UrlEncodedFormEntity(nvps, WebUtils.UTF_ENCODING));
 				break;
 
-			case PARAM_JSON:
+			case JSON:
 				// Json数据
 				StringEntity stringEntity = new StringEntity(JsonMapper.toJsonString(params), WebUtils.UTF_ENCODING);// 解决中文乱码问题
 				stringEntity.setContentEncoding(WebUtils.UTF_ENCODING);

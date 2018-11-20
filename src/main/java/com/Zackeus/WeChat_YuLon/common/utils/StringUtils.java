@@ -33,21 +33,36 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     /**
      * 
      * @Title：getBytes
-     * @Description: TODO(转换为字节数组)
+     * @Description: TODO(转换为字节数组[UTF-8])
      * @see：
      * @param str
      * @return
      */
     public static byte[] getBytes(String str){
-    	if (str != null) {
-    		try {
-				return str.getBytes(WebUtils.UTF_ENCODING);
-			} catch (UnsupportedEncodingException e) {
-				Logs.error("转换为字节数组异常：" + e.getMessage());
-			}
-    	}
-    	return null;
+    	return getContentBytes(str, WebUtils.UTF_ENCODING);
     }
+    
+    /**
+     * 
+     * @Title：getContentBytes
+     * @Description: TODO(字符转指定编码byte)
+     * @see：
+     * @param content
+     * @param charset
+     * @return
+     */
+    public static byte[] getContentBytes(String content, String charset) {
+    	if (StringUtils.isNotBlank(content)) {
+            if (StringUtils.isBlank(charset))
+                return content.getBytes();   
+            try {   
+                return content.getBytes(charset);   
+            } catch (UnsupportedEncodingException e) {
+         	   Logs.error("字符转byte出现错误,指定的编码集不对,您目前指定的编码集是:" + charset);
+            }
+		}
+        return null;
+    } 
     
     /**
      * 

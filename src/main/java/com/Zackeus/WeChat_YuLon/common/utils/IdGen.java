@@ -99,7 +99,7 @@ public class IdGen implements IdGenerator, SessionIdGenerator {
 	 * 测试
 	 */
 	public static void main(String[] args) {
-		System.out.println(getRandom(3));
+		System.out.println(randomBase62(32));
 //		System.out.println(IdGen.uuid());
 //		System.out.println(IdGen.uuid().length());
 //		System.out.println(new IdGen().getNextId());
