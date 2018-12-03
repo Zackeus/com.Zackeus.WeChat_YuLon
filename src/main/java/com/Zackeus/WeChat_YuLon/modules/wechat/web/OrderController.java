@@ -1,8 +1,11 @@
 package com.Zackeus.WeChat_YuLon.modules.wechat.web;
 
-import java.util.HashMap;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.Map;
 
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -14,18 +17,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.Zackeus.WeChat_YuLon.common.config.WeChatConfig;
 import com.Zackeus.WeChat_YuLon.common.config.WxPayConfig;
 import com.Zackeus.WeChat_YuLon.common.entity.AjaxResult;
-import com.Zackeus.WeChat_YuLon.common.entity.HttpClientResult;
 import com.Zackeus.WeChat_YuLon.common.utils.IdGen;
 import com.Zackeus.WeChat_YuLon.common.utils.Logs;
 import com.Zackeus.WeChat_YuLon.common.utils.WXUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.WebUtils;
-import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpClientUtil;
+import com.Zackeus.WeChat_YuLon.common.utils.XmlUtil;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 import com.Zackeus.WeChat_YuLon.common.web.BaseHttpController;
 import com.Zackeus.WeChat_YuLon.modules.sys.utils.UserUtils;
+import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatOrder;
 import com.Zackeus.WeChat_YuLon.modules.wechat.service.OrderService;
 
 /**
@@ -41,13 +43,10 @@ import com.Zackeus.WeChat_YuLon.modules.wechat.service.OrderService;
 public class OrderController extends BaseHttpController {
 	
 	@Autowired
-	WeChatConfig weChatConfig;
-
-	@Autowired
-	WxPayConfig wxPayConfig;
+	OrderService orderService;
 	
 	@Autowired
-	OrderService orderService;
+	private WxPayConfig wxPayConfig;
 
 	/**
 	 * 
@@ -69,90 +68,89 @@ public class OrderController extends BaseHttpController {
 	 * @Title：onlineRepay
 	 * @Description: TODO(线上还款) @see：
 	 * @param request
+	 * 
+	 * 
+	 * 
 	 * @param response
 	 * @throws Exception 
 	 */
 	@RequiresPermissions("wechatUser")
 	@RequestMapping(value = "/onlineRepay", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, method = RequestMethod.POST)
 	public void onlineRepay(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		//生成的随机字符串
-		String nonce_str = IdGen.randomBase62(32);
-		//商品名称
-		String body = "测试商品名称";
-		//获取客户端的ip地址
-		String spbill_create_ip = WebUtils.getIpAddress(request);
+		WeChatOrder weChatOrder = new WeChatOrder();
 		
-		//组装参数，用户生成统一下单接口的签名
-		Map<String, String> packageParams = new HashMap<String, String>();
-		packageParams.put("appid", weChatConfig.getAppId());
-		packageParams.put("mch_id", wxPayConfig.getMch_id());
-		packageParams.put("nonce_str", nonce_str);
-		packageParams.put("body", body);
-		packageParams.put("out_trade_no", "123456789");//商户订单号
-		packageParams.put("total_fee", "1");//支付金额，这边需要转成字符串类型，否则后面的签名会失败
-		packageParams.put("spbill_create_ip", spbill_create_ip);
-		packageParams.put("notify_url", wxPayConfig.getNotify_url());//支付成功后的回调地址
-		packageParams.put("trade_type", wxPayConfig.getTrade_type());//支付方式
-		packageParams.put("openid", UserUtils.getPrincipal().getOpenId());
-		   
-        String prestr = WXUtils.createLinkString(packageParams); // 把数组所有元素，按照“参数=参数值”的模式用“&”字符拼接成字符串 
-        
-        Logs.info("字符拼接：" + prestr);
-	        
-        //MD5运算生成签名，这里是第一次签名，用于调用统一下单接口
-        String mysign = WXUtils.sign(prestr, wxPayConfig.getKey());
-        
-        Logs.info("第一次签名：" + mysign);
-	        
-        //拼接统一下单接口使用的xml数据，要将上一步生成的签名一起拼接进去
-        String xml = "<xml>" + "<appid>" + weChatConfig.getAppId() + "</appid>" 
-                + "<body><![CDATA[" + body + "]]></body>" 
-                + "<mch_id>" + wxPayConfig.getMch_id() + "</mch_id>" 
-                + "<nonce_str>" + nonce_str + "</nonce_str>" 
-                + "<notify_url>" + wxPayConfig.getNotify_url() + "</notify_url>" 
-                + "<openid>" + UserUtils.getPrincipal().getOpenId() + "</openid>" 
-                + "<out_trade_no>" + "123456789" + "</out_trade_no>" 
-                + "<spbill_create_ip>" + spbill_create_ip + "</spbill_create_ip>" 
-                + "<total_fee>" + "1" + "</total_fee>"
-                + "<trade_type>" + wxPayConfig.getTrade_type() + "</trade_type>" 
-                + "<sign>" + mysign + "</sign>"
-                + "</xml>";
-        Logs.info("请求XML数据：" + xml);
- 
-        //调用统一下单接口，并接受返回的结果
-        HttpClientResult result = HttpClientUtil.doPostXml(wxPayConfig.getPay_url(), xml);
-        
-        Logs.info("返回XML数据: " + result);
-        
-//	        
-//	        // 将解析结果存储在HashMap中   
-//	        Map map = PayUtil.doXMLParse(result);
-//	        
-//	        String return_code = (String) map.get("return_code");//返回状态码
-//	        
-//		    Map<String, Object> response = new HashMap<String, Object>();//返回给小程序端需要的参数
-//	        if(return_code.equals("SUCCESS")){   
-//	            String prepay_id = (String) map.get("prepay_id");//返回的预付单信息   
-//	            response.put("nonceStr", nonce_str);
-//	            response.put("package", "prepay_id=" + prepay_id);
-//	            Long timeStamp = System.currentTimeMillis() / 1000;   
-//	            response.put("timeStamp", timeStamp + "");//这边要将返回的时间戳转化成字符串，不然小程序端调用wx.requestPayment方法会报签名错误
-//	            //拼接签名需要的参数
-//	            String stringSignTemp = "appId=" + WxPayConfig.appid + "&nonceStr=" + nonce_str + "&package=prepay_id=" + prepay_id+ "&signType=MD5&timeStamp=" + timeStamp;   
-//	            //再次签名，这个签名用于小程序端调用wx.requesetPayment方法
-//	            String paySign = PayUtil.sign(stringSignTemp, WxPayConfig.key, "utf-8").toUpperCase();
-//	            
-//	            response.put("paySign", paySign);
-//	        }
-//			
-//	        response.put("appid", WxPayConfig.appid);
-//			
-//	        return response;
-//		}catch(Exception e){
-//			e.printStackTrace();
-//		}
-//		return null;
-		renderString(response, new AjaxResult(HttpStatus.SC_SUCCESS, "查询成功"));
+		weChatOrder.setTotalFee(1);
+		
+		weChatOrder.setOpenId(UserUtils.getPrincipal().getOpenId());;
+		weChatOrder.setOutTradeNo(IdGen.getOrder("OR"));
+		weChatOrder.setNonceStr(IdGen.randomBase62(32));
+		weChatOrder.setSpbillCreateIp(WebUtils.getIpAddress(request));
+		weChatOrder.setBody("测试商品名称");
+		
+		Map<String, String> resMap = orderService.unifiedOrder(weChatOrder);
+		renderString(response, new AjaxResult(HttpStatus.SC_SUCCESS, "下单成功", resMap));
 	}
+	
+	/**
+	 * 
+	 * @Title：wxNotify
+	 * @Description: TODO(微信支付结果通知)
+	 * @see：
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 */
+    @RequestMapping(value="/wxNotify", consumes = MediaType.TEXT_XML_VALUE, produces = MediaType.TEXT_XML_VALUE, method = RequestMethod.POST)
+    public void wxNotify(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader((ServletInputStream)request.getInputStream()));
+        String line = null;
+        StringBuilder sb = new StringBuilder();
+        while((line = br.readLine()) != null){
+            sb.append(line);
+        }
+        
+        br.close();
+        //sb为微信返回的xml
+        String notityXml = sb.toString();
+        String resXml = "";
+        
+        Logs.info("接收到的报文：" + notityXml);
+ 
+        Map<String, String> map = XmlUtil.xmlToMap(notityXml);
+ 
+        String returnCode = (String) map.get("return_code");
+        if("SUCCESS".equals(returnCode)) {
+            //验证签名是否正确
+            Map<String, String> validParams = WXUtils.paraFilter(map);  //回调验签时需要去除sign和空值参数
+            String validStr = WXUtils.createLinkString(validParams);	//把数组所有元素，按照“参数=参数值”的模式用“&”字符拼接成字符串
+            String sign = WXUtils.sign(validStr, wxPayConfig.getKey());	//拼装生成服务器端验证的签名
+            //根据微信官网的介绍，此处不仅对回调的参数进行验签，还需要对返回的金额与系统订单的金额进行比对等
+            if(sign.equals(map.get("sign"))){
+                /**此处添加自己的业务逻辑代码start**/
+            	Logs.info("验证成功");
+                /**此处添加自己的业务逻辑代码end**/
+                //通知微信服务器已经支付成功
+                resXml = "<xml>" 
+                		+ "<return_code><![CDATA[SUCCESS]]></return_code>"
+                        + "<return_msg><![CDATA[OK]]></return_msg>" 
+                		+ "</xml> ";
+            }
+        }else{
+        	Logs.info("验证失败");
+            resXml = "<xml>" 
+            		+ "<return_code><![CDATA[FAIL]]></return_code>"
+                    + "<return_msg><![CDATA[报文为空]]></return_msg>" 
+            		+ "</xml> ";
+        }
+        
+        Logs.info(resXml);
+        Logs.info("微信支付回调数据结束");
+ 
+        BufferedOutputStream out = new BufferedOutputStream(
+                response.getOutputStream());
+        out.write(resXml.getBytes());
+        out.flush();
+        out.close();
+    }
 
 }

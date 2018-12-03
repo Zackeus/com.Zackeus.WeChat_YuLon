@@ -92,14 +92,27 @@ public class IdGen implements IdGenerator, SessionIdGenerator {
 		}
 		return fourRandom;
 	}
-
-
 	
+	/**
+	 * 
+	 * @Title：getOrder
+	 * @Description: TODO(订单号生成器)
+	 * @see：头标签  + 18位
+	 * @param header
+	 * @return
+	 */
+	public static String getOrder(String header) {
+		String order = String.valueOf(new SnowFlake(1, 1).nextId());
+		return StringUtils.isNotBlank(header) ? header + order : order;
+	}
+
 	/**
 	 * 测试
 	 */
 	public static void main(String[] args) {
-		System.out.println(randomBase62(32));
+		System.out.println(getOrder("OR"));
+		
+//		System.out.println(randomBase62(32));
 //		System.out.println(IdGen.uuid());
 //		System.out.println(IdGen.uuid().length());
 //		System.out.println(new IdGen().getNextId());
