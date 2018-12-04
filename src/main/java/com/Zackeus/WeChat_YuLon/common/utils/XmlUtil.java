@@ -139,60 +139,63 @@ public class XmlUtil extends com.sun.xml.internal.ws.util.xml.XmlUtil {
 	    	   return null;
 		}
 	}
+	
+	/**
+     * 将驼峰式命名的字符串转换为下划线大写方式。如果转换前的驼峰式命名的字符串为空，则返回空字符串。</br>
+     * 例如：HelloWorld->HELLO_WORLD
+     * @param name 转换前的驼峰式命名的字符串
+     * @return 转换后下划线大写方式命名的字符串
+     */
+    public static String underscoreName(String name) {
+        StringBuilder result = new StringBuilder();
+        if (StringUtils.isNotBlank(name)) {
+            // 将第一个字符处理成大写
+            result.append(name.substring(0, 1).toUpperCase());
+            // 循环处理其余字符
+            for (int i = 1; i < name.length(); i++) {
+                String s = name.substring(i, i + 1);
+                // 在大写字母前添加下划线
+                if (s.equals(s.toUpperCase()) && !Character.isDigit(s.charAt(0)))
+                    result.append("_");
+                // 其他字符直接转成大写
+                result.append(s.toUpperCase());
+            }
+        }
+        return result.toString();
+    }
 
-//	/**
-//	 * 判断签名是否正确
-//	 *
-//	 * @param xmlStr
-//	 *            XML格式数据
-//	 * @param key
-//	 *            API密钥
-//	 * @return 签名是否正确
-//	 * @throws Exception
-//	 */
-//	public static boolean isSignatureValid(String xmlStr, String key) throws Exception {
-//		Map<String, String> data = xmlToMap(xmlStr);
-//		if (!data.containsKey(WXPayConstants.FIELD_SIGN)) {
-//			return false;
-//		}
-//		String sign = data.get(WXPayConstants.FIELD_SIGN);
-//		return generateSignature(data, key).equals(sign);
-//	}
-//
-//	/**
-//	 * 判断签名是否正确，必须包含sign字段，否则返回false。使用MD5签名。
-//	 *
-//	 * @param data
-//	 *            Map类型数据
-//	 * @param key
-//	 *            API密钥
-//	 * @return 签名是否正确
-//	 * @throws Exception
-//	 */
-//	public static boolean isSignatureValid(Map<String, String> data, String key) throws Exception {
-//		return isSignatureValid(data, key, SignType.MD5);
-//	}
-//
-//	/**
-//	 * 判断签名是否正确，必须包含sign字段，否则返回false。
-//	 *
-//	 * @param data
-//	 *            Map类型数据
-//	 * @param key
-//	 *            API密钥
-//	 * @param signType
-//	 *            签名方式
-//	 * @return 签名是否正确
-//	 * @throws Exception
-//	 */
-//	public static boolean isSignatureValid(Map<String, String> data, String key, SignType signType) throws Exception {
-//		if (!data.containsKey(WXPayConstants.FIELD_SIGN)) {
-//			return false;
-//		}
-//		String sign = data.get(WXPayConstants.FIELD_SIGN);
-//		return generateSignature(data, key, signType).equals(sign);
-//	}
-//
+    /**
+     * 将下划线大写方式命名的字符串转换为驼峰式。如果转换前的下划线大写方式命名的字符串为空，则返回空字符串。</br>
+     * 例如：HELLO_WORLD->HelloWorld
+     * @param name 转换前的下划线大写方式命名的字符串
+     * @return 转换后的驼峰式命名的字符串
+     */
+    public static String camelName(String name) {
+        StringBuilder result = new StringBuilder();
+        // 快速检查
+        if (StringUtils.isBlank(name))
+            return StringUtils.EMPTY;
+        else if (!name.contains("_"))
+            // 不含下划线，仅将首字母小写
+            return name.substring(0, 1).toLowerCase() + name.substring(1);
+        // 用下划线将原始字符串分割
+        String camels[] = name.split("_");
+        for (String camel :  camels) {
+            // 跳过原始字符串中开头、结尾的下换线或双重下划线
+            if (camel.isEmpty())
+                continue;
+            // 处理真正的驼峰片段
+            if (result.length() == 0)
+                // 第一个驼峰片段，全部字母都小写
+                result.append(camel.toLowerCase());
+            else {
+                // 其他的驼峰片段，首字母大写
+                result.append(camel.substring(0, 1).toUpperCase());
+                result.append(camel.substring(1).toLowerCase());
+            }
+        }
+        return result.toString();
+    }
 	
 	/**
 	 * 
@@ -203,18 +206,20 @@ public class XmlUtil extends com.sun.xml.internal.ws.util.xml.XmlUtil {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		Map<String, String> packageParams = new HashMap<String, String>();
-		packageParams.put("appid", "123");
-		packageParams.put("mch_id", "456");
-		packageParams.put("nonce_str", "qdqwdq");
-		packageParams.put("body", "测试");
-		packageParams.put("out_trade_no", "HP123");
-		packageParams.put("total_fee", "1");
-		packageParams.put("spbill_create_ip", "127.0.0.1");
-		packageParams.put("notify_url", "https://www.baidu.com");
-		packageParams.put("trade_type", "JSAPI");
-		packageParams.put("openid", "ASDQQWEQWE");
-		System.out.println(mapToXml(packageParams));
+		System.out.println(camelName("appid"));
+		
+//		Map<String, String> packageParams = new HashMap<String, String>();
+//		packageParams.put("appid", "123");
+//		packageParams.put("mch_id", "456");
+//		packageParams.put("nonce_str", "qdqwdq");
+//		packageParams.put("body", "测试");
+//		packageParams.put("out_trade_no", "HP123");
+//		packageParams.put("total_fee", "1");
+//		packageParams.put("spbill_create_ip", "127.0.0.1");
+//		packageParams.put("notify_url", "https://www.baidu.com");
+//		packageParams.put("trade_type", "JSAPI");
+//		packageParams.put("openid", "ASDQQWEQWE");
+//		System.out.println(mapToXml(packageParams));
 		
 //		String xml = "<xml>"
 //				+"<return_code><![CDATA[SUCCESS]]></return_code>"

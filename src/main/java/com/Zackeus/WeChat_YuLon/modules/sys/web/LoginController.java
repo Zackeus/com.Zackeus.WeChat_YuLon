@@ -66,7 +66,7 @@ public class LoginController extends BaseController {
 		Principal principal = UserUtils.getPrincipal();
 		// 如果已经登录，则跳转到管理首页
 		if (principal != null) {
-			renderString(response, new AjaxResult(HttpStatus.SC_SUCCESS, "已经登录"));
+			renderJson(response, new AjaxResult(HttpStatus.SC_SUCCESS, "已经登录"));
 			return;
 		}
 		AjaxResult ajaxResult = (AjaxResult) request.getAttribute(LoginAuthenticationFilter.DEFAULT_MESSAGE_PARAM);
@@ -75,7 +75,7 @@ public class LoginController extends BaseController {
 					"身份验证不符合！" : "用户或密码错误, 请重试.";
 			ajaxResult = new AjaxResult(HttpStatus.SC_LOGIN_ERROR, message);
 		}
-		renderString(response, ajaxResult);
+		renderJson(response, ajaxResult);
 	}
 	
 	/**
@@ -91,7 +91,7 @@ public class LoginController extends BaseController {
 	@RequestMapping(value = "/loginSuccess", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public String loginSuccess(HttpServletRequest request, HttpServletResponse response, Model model) {
 		if (WebUtils.isAjaxRequest(request)) {
-			renderString(response, new AjaxResult(HttpStatus.SC_SUCCESS, "登录成功"));
+			renderJson(response, new AjaxResult(HttpStatus.SC_SUCCESS, "登录成功"));
 			return null;
 		}
 		return "modules/sys/sysIndex";

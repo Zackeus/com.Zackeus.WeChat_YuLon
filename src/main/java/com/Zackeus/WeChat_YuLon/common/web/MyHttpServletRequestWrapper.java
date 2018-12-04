@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.StreamUtils;
-import net.sf.json.JSONObject;
 
 /**
  * 
@@ -39,7 +38,7 @@ public class MyHttpServletRequestWrapper extends HttpServletRequestWrapper {
 	public MyHttpServletRequestWrapper(HttpServletRequest request, Object object, String charset) {
 		super(request);
 		try {
-			requestBody = JSONObject.fromObject(object).toString().getBytes(charset);
+			requestBody = object.toString().getBytes(charset);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

@@ -33,8 +33,9 @@ public class WXUtils {
 
 	private static int BAES_KEY_BYTE = 16;
 	
-	private static String SUCCESS_CODE = "SUCCESS";
-	private static String OK_CODE = "OK";
+	public static String SUCCESS_CODE = "SUCCESS";
+	public static String OK_CODE = "OK";
+	public static String FAIL_CODE = "FAIL";
 
 	/**
 	 * 

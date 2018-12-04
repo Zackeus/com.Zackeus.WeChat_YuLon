@@ -23,6 +23,7 @@
     	<mvc:argument-resolvers>
         	<bean class="com.Zackeus.WeChat_YuLon.common.annotation.argumentResolver.PageRequestBody.PageRequestBodyArgumentResolver"/>
         	<bean class="com.Zackeus.WeChat_YuLon.common.annotation.argumentResolver.RequestAttribute.RequestAttributeArgumentResolver"/>
+    		<bean class="com.Zackeus.WeChat_YuLon.common.annotation.argumentResolver.XMLRequestBody.XMLRequestBodyArgumentResolver"/>
     	</mvc:argument-resolvers>
     	<mvc:message-converters register-defaults="true">
     		<!-- 将StringHttpMessageConverter的默认编码设为UTF-8 -->

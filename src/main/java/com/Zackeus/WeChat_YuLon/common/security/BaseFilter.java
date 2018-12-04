@@ -57,23 +57,46 @@ public abstract class BaseFilter extends AdviceFilter {
 
 	/**
 	 * 
-	 * @Title：handleHttpRequest
-	 * @Description: TODO(处理请求返回)
+	 * @Title：renderJson
+	 * @Description: TODO(回写JSON)
 	 * @see：
-	 * @param httpServletRequest
-	 * @param httpServletResponse
+	 * @param response
 	 * @param msg
-	 * @throws IOException
 	 */
-	protected void handleHttpRequest(ServletResponse response, Object msg) {
+	protected void renderJson(ServletResponse response, Object msg) {
+		renderString(response, JsonMapper.toJsonString(msg), MediaType.APPLICATION_JSON_VALUE);
+	}
+	
+	/**
+	 * 
+	 * @Title：renderJson
+	 * @Description: TODO(回写XML)
+	 * @see：
+	 * @param response
+	 * @param msg
+	 */
+	protected void renderXML(ServletResponse response, String msg) {
+		renderString(response, msg, MediaType.TEXT_XML_VALUE);
+	}
+	
+	/**
+	 * 
+	 * @Title：renderString
+	 * @Description: TODO(回写JSON)
+	 * @see：
+	 * @param response
+	 * @param msg
+	 * @param type
+	 */
+	protected void renderString(ServletResponse response, String msg, String type) {
 		HttpServletResponse httpServletResponse = WebUtils.toHttp(response);
 		httpServletResponse.reset();
 		httpServletResponse.setCharacterEncoding(WebUtils.UTF_ENCODING);
-		httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		httpServletResponse.setContentType(type);
 		try {
-			httpServletResponse.getWriter().print(JsonMapper.toJsonString(msg));
+			httpServletResponse.getWriter().print(msg);
 		} catch (IOException e) {
-			Logs.error("拦截器信息回填异常：" + e.getMessage());
+			Logs.error("拦截器信息回填异常：" + Logs.toLog(e));
 		}
 	}
 	
@@ -91,9 +114,9 @@ public abstract class BaseFilter extends AdviceFilter {
 		}
 		if (ObjectUtils.isNotEmpty(exception)) {
 			if (exception instanceof MyException) {
-				handleHttpRequest(response, new AjaxResult(((MyException) exception).getErrorCode(), exception.getMessage()));
+				renderJson(response, new AjaxResult(((MyException) exception).getErrorCode(), exception.getMessage()));
             } else {
-				handleHttpRequest(response, new AjaxResult(HttpStatus.SC_LOGIN_ERROR, exception.getMessage()));
+            	renderJson(response, new AjaxResult(HttpStatus.SC_LOGIN_ERROR, exception.getMessage()));
             }
 		}
 	}

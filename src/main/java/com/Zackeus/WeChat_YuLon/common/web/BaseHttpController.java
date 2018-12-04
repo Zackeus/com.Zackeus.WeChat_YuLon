@@ -83,7 +83,7 @@ public abstract class BaseHttpController extends BaseController {
 	@ExceptionHandler({MissingServletRequestParameterException.class})
 	public String handleMissingServletRequestParameterException(HttpServletRequest request, HttpServletResponse response,
 			MissingServletRequestParameterException e) {
-        return renderString(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "缺少请求参数：" + e.getMessage()));
+        return renderJson(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "缺少请求参数：" + e.getMessage()));
 	}
 	
 	/**
@@ -99,7 +99,7 @@ public abstract class BaseHttpController extends BaseController {
 	@ExceptionHandler({HttpMessageNotReadableException.class})
 	public String handleHttpMessageNotReadableException(HttpServletRequest request, HttpServletResponse response,
 			HttpMessageNotReadableException e) {
-		return renderString(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "参数解析失败：" + e.getMessage()));
+		return renderJson(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "参数解析失败：" + e.getMessage()));
 	}
 	
     /**
@@ -116,7 +116,7 @@ public abstract class BaseHttpController extends BaseController {
     public String methodArgumentNotValidExceptio(HttpServletRequest request, HttpServletResponse response, 
     		MethodArgumentNotValidException e) {
     	String errorMesssage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-    	return renderString(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "参数校验异常：" + errorMesssage));
+    	return renderJson(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "参数校验异常：" + errorMesssage));
     }
     
     /**
@@ -133,7 +133,7 @@ public abstract class BaseHttpController extends BaseController {
     public String handleBindException(HttpServletRequest request, HttpServletResponse response, 
     		BindException e) {
     	String errorMesssage = e.getBindingResult().getFieldError().getField();
-    	return renderString(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "参数绑定失败：" + errorMesssage));
+    	return renderJson(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "参数绑定失败：" + errorMesssage));
     }
 
     /**
@@ -152,7 +152,7 @@ public abstract class BaseHttpController extends BaseController {
 	    Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 	    ConstraintViolation<?> violation = violations.iterator().next();
 	    String message = violation.getMessage();
-	    return renderString(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "参数校验异常:" + message));
+	    return renderJson(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "参数校验异常:" + message));
     }
 	
 	/**
@@ -168,7 +168,7 @@ public abstract class BaseHttpController extends BaseController {
 	@ExceptionHandler({ValidationException.class})
     public String handleValidationException(HttpServletRequest request, HttpServletResponse response, 
     		ValidationException e) {
-		return renderString(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "参数验证失败：" + e.getMessage()));
+		return renderJson(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "参数验证失败：" + e.getMessage()));
     }
 	
 	/**
@@ -184,7 +184,7 @@ public abstract class BaseHttpController extends BaseController {
 	@ExceptionHandler({IllegalArgumentException.class})
     public String handleIllegalArgumentException(HttpServletRequest request, HttpServletResponse response, 
     		IllegalArgumentException e) {
-		return renderString(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "参数不合法：" + e.getMessage()));
+		return renderJson(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "参数不合法：" + e.getMessage()));
     }
 	
 	/**
@@ -200,7 +200,7 @@ public abstract class BaseHttpController extends BaseController {
 	@ExceptionHandler({IllegalAccessException.class})
     public String handleIllegalAccessException(HttpServletRequest request, HttpServletResponse response, 
     		IllegalAccessException e) {
-		return renderString(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "安全权限异常：" + e.getMessage()));
+		return renderJson(response, new AjaxResult(HttpStatus.SC_BAD_REQUEST, "安全权限异常：" + e.getMessage()));
     }
 	
 	/**
@@ -216,7 +216,7 @@ public abstract class BaseHttpController extends BaseController {
 	@ExceptionHandler({HttpRequestMethodNotSupportedException.class})
     public String handleHttpRequestMethodNotSupportedException(HttpServletRequest request, HttpServletResponse response, 
     		HttpRequestMethodNotSupportedException e) {
-		return renderString(response, new AjaxResult(HttpStatus.SC_METHOD_NOT_ALLOWED, "不支持当前请求方法：" + e.getMessage()));
+		return renderJson(response, new AjaxResult(HttpStatus.SC_METHOD_NOT_ALLOWED, "不支持当前请求方法：" + e.getMessage()));
     }
 	
 	/**
@@ -232,7 +232,7 @@ public abstract class BaseHttpController extends BaseController {
 	@ExceptionHandler(HttpMediaTypeNotSupportedException.class)
 	public String handleHttpMediaTypeNotSupportedException(HttpServletRequest request, HttpServletResponse response,
 			HttpMediaTypeNotSupportedException e) {
-		return renderString(response, new AjaxResult(HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE, "不支持当前媒体类型：" + e.getMessage()));
+		return renderJson(response, new AjaxResult(HttpStatus.SC_UNSUPPORTED_MEDIA_TYPE, "不支持当前媒体类型：" + e.getMessage()));
 	}
     
 	/**
@@ -246,7 +246,7 @@ public abstract class BaseHttpController extends BaseController {
 	 */
     @ExceptionHandler({ UnauthorizedException.class, AuthorizationException.class })
     public String authorizationException(HttpServletRequest request, HttpServletResponse response) {
-    	return renderString(response, new AjaxResult(HttpStatus.SC_FORBIDDEN, "当前账号无权进行此操作!!!"));
+    	return renderJson(response, new AjaxResult(HttpStatus.SC_FORBIDDEN, "当前账号无权进行此操作!!!"));
     }
     
     /**
@@ -261,7 +261,7 @@ public abstract class BaseHttpController extends BaseController {
      */
     @ExceptionHandler(ServiceException.class)
     public String handleServiceException(HttpServletRequest request, HttpServletResponse response, ServiceException e) {
-    	return renderString(response, new AjaxResult(HttpStatus.SC_INTERNAL_SERVER_ERROR, "业务逻辑异常：" + e.getMessage()));
+    	return renderJson(response, new AjaxResult(HttpStatus.SC_INTERNAL_SERVER_ERROR, "业务逻辑异常：" + e.getMessage()));
     }
     
     /**
@@ -276,7 +276,7 @@ public abstract class BaseHttpController extends BaseController {
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public String handleException(HttpServletRequest request, HttpServletResponse response, DataIntegrityViolationException e) {
-    	return renderString(response, new AjaxResult(HttpStatus.SC_SQL_SERROR, "操作数据库异常：" + e.getMessage()));
+    	return renderJson(response, new AjaxResult(HttpStatus.SC_SQL_SERROR, "操作数据库异常：" + e.getMessage()));
     }
     
 	/**
@@ -290,7 +290,7 @@ public abstract class BaseHttpController extends BaseController {
 	 */
 	@ExceptionHandler({ MyException.class })
 	public String schedulerException(HttpServletRequest request, HttpServletResponse response, MyException e) {
-		return renderString(response, new AjaxResult(e.getErrorCode(), e.getMessage(), e.getObject()));
+		return renderJson(response, new AjaxResult(e.getErrorCode(), e.getMessage(), e.getObject()));
 	}
 	
 	/**
@@ -305,7 +305,7 @@ public abstract class BaseHttpController extends BaseController {
 	 */
 	@ExceptionHandler({ Exception.class })
 	public String exception(HttpServletRequest request, HttpServletResponse response, Exception e) {
-		return renderString(response, new AjaxResult(HttpStatus.SC_UNKNOWN, "未知的错误：" + e.getMessage()));
+		return renderJson(response, new AjaxResult(HttpStatus.SC_UNKNOWN, "未知的错误：" + e.getMessage()));
 	}
 
 }

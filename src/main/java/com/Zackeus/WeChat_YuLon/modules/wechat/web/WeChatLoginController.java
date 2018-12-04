@@ -145,7 +145,7 @@ public class WeChatLoginController extends BaseHttpController {
 		weChatUser.getWeChatRegister().setSmsTime(Calendar.getInstance().getTimeInMillis());
 		request.getSession().setAttribute(WeChatConfig.WE_CHAT_USER, weChatUser);
 
-		renderString(response, new AjaxResult(HttpStatus.SC_SUCCESS, "发送验证码成功"));
+		renderJson(response, new AjaxResult(HttpStatus.SC_SUCCESS, "发送验证码成功"));
 	}
 
 	/**
@@ -169,7 +169,7 @@ public class WeChatLoginController extends BaseHttpController {
 		
 		weChatService.registerWechatUser(weChatUser);
 		
-		renderString(response, new AjaxResult(HttpStatus.SC_SUCCESS, "注册信息成功"));
+		renderJson(response, new AjaxResult(HttpStatus.SC_SUCCESS, "注册信息成功"));
 	}
 
 }
