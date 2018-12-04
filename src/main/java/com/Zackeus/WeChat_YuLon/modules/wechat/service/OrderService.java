@@ -1,6 +1,5 @@
 package com.Zackeus.WeChat_YuLon.modules.wechat.service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,17 +7,13 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.Zackeus.WeChat_YuLon.common.config.WeChatConfig;
-import com.Zackeus.WeChat_YuLon.common.config.WxPayConfig;
-import com.Zackeus.WeChat_YuLon.common.entity.HttpClientResult;
 import com.Zackeus.WeChat_YuLon.common.service.CrudService;
-import com.Zackeus.WeChat_YuLon.common.utils.Logs;
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.StringUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.WXUtils;
-import com.Zackeus.WeChat_YuLon.common.utils.XmlUtil;
-import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpClientUtil;
 import com.Zackeus.WeChat_YuLon.modules.sys.utils.UserUtils;
+import com.Zackeus.WeChat_YuLon.modules.wechat.config.WeChatConfig;
+import com.Zackeus.WeChat_YuLon.modules.wechat.config.WxPayConfig;
 import com.Zackeus.WeChat_YuLon.modules.wechat.dao.OrderDao;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.OrderDetail;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.OrderRepayPlan;
@@ -84,7 +79,7 @@ public class OrderService extends CrudService<OrderDao, OrderDetail> {
 	/**
 	 * 
 	 * @Title：wechatOrder
-	 * @Description: TODO(微信支付统一下单)
+	 * @Description: TODO(逾期还款下单)
 	 * @see：
 	 * @param out_trade_no 商户订单号
 	 * @param nonce_str 生成的随机字符串
@@ -93,41 +88,8 @@ public class OrderService extends CrudService<OrderDao, OrderDetail> {
 	 * @return
 	 * @throws Exception
 	 */
-	public Map<String, String> unifiedOrder(WeChatOrder weChatOrder) throws Exception {
-		Map<String, String> packageParams = WXUtils.createMap(weChatOrder, weChatConfig, wxPayConfig);
-		
-		String xml = WXUtils.createSignedXml(wxPayConfig, packageParams);
-        Logs.info("请求XML数据：" + xml);
- 
-        //调用统一下单接口，并接受返回的结果
-        HttpClientResult result = HttpClientUtil.doPostXml(wxPayConfig.getPay_url(), xml);
-        
-        Logs.info("返回XML数据: " + result);
-	        
-        // 将解析结果存储在HashMap中   
-        Map<String, String> map = XmlUtil.xmlToMap(result.getContent());
-	        
-        String return_code = (String) map.get("return_code");//返回状态码
-        Logs.info("统一下单状态码：" + return_code);
-	    
-        //返回给小程序端需要的参数(二次签名)
-		Map<String, String> resMap = new HashMap<String, String>();
-        if(return_code.equals("SUCCESS")){
-        	Long timeStamp = System.currentTimeMillis() / 1000;
-            resMap.put("nonceStr", weChatOrder.getNonceStr());			// 随机字符串
-            resMap.put("package", "prepay_id=" + map.get("prepay_id")); // 统一下单接口返回的 prepay_id 参数值
-            resMap.put("signType", "MD5");								// 签名算法
-            resMap.put("timeStamp", String.valueOf(timeStamp));			// 这边要将返回的时间戳转化成字符串，不然小程序端调用wx.requestPayment方法会报签名错误
-            //拼接签名需要的参数
-//            String stringSignTemp = WXUtils.createLinkString(resMap);
-            String stringSignTemp = "appId=" + weChatConfig.getAppId() + "&nonceStr=" + weChatOrder.getNonceStr() + "&package=prepay_id=" + map.get("prepay_id") + "&signType=MD5&timeStamp=" + timeStamp;
-            Logs.info("在签名拼接字符：" + stringSignTemp);
-            //再次签名，这个签名用于小程序端调用wx.requesetPayment方法
-            String paySign = WXUtils.sign(stringSignTemp, wxPayConfig.getKey());
-            resMap.put("paySign", paySign);
-        }
-        
-        return resMap;
+	public Map<String, String> repayOrder(WeChatOrder weChatOrder) throws Exception {
+        return WXUtils.orderPay(weChatOrder, weChatConfig, wxPayConfig);
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.Zackeus.WeChat_YuLon.common.config;
+package com.Zackeus.WeChat_YuLon.modules.wechat.config;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.springframework.beans.factory.annotation.Value;

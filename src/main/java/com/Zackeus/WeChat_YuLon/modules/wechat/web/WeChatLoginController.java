@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.Zackeus.WeChat_YuLon.common.config.MsgConfig;
-import com.Zackeus.WeChat_YuLon.common.config.WeChatConfig;
 import com.Zackeus.WeChat_YuLon.common.entity.AjaxResult;
 import com.Zackeus.WeChat_YuLon.common.service.valid.Register;
 import com.Zackeus.WeChat_YuLon.common.utils.AssertUtil;
@@ -28,6 +27,7 @@ import com.Zackeus.WeChat_YuLon.common.utils.StringUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.WXUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 import com.Zackeus.WeChat_YuLon.common.web.BaseHttpController;
+import com.Zackeus.WeChat_YuLon.modules.wechat.config.WeChatConfig;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.OrderDetail;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatRegister;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;

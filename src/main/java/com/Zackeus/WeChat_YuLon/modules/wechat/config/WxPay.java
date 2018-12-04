@@ -23,11 +23,22 @@ public enum WxPay {
 	NONCE_STR("nonce_str", "nonceStr"),						// 随机字符串
 	SPBILL_CREATE_IP("spbill_create_ip", "spbillCreateIp"),	// 终端IP
 	NOTIFY_URL("notify_url", "notifyUrl"),					// 通知地址
-	SIGN("sign", "sign"),									// 签名
-	SIGN_TYPE("sign_type", "signType");						// 签名类型	
+	SIGN("sign", "sign"),									// 签名(统一下单)
+	SIGN_TYPE("sign_type", "signType"),						// 签名类型
+	PREPAY_ID("prepay_id", "prepayId"),						// 预支付交易会话标识
+	KEY("key", "key"),										// 商户平台密钥
 	
-	String wxKey; 		// 微信关键字
-	String entityKey;	// 实体关键字
+	PAY_SIGN("pay_sign", "paySign"),						// 签名(异步支付)
+	PACKAGE("package", "package"),							// 统一下单接口返回的 prepay_id 参数值
+	TIME_STAMP("time_stamp", "timeStamp"),					// 时间戳
+	
+	RETURN_CODE("return_code", "returnCode"),				// 统一下单返回状态码
+	RETURN_MSG("return_msg", "returnMsg"),					// 统一下单返回信息
+	ERR_CODE("err_code", "errCode"),						// 错误代码
+	ERR_CODE_DES("err_code_des", "errCodeDes");				// 错误代码描述
+	
+	String wxKey; 		// 微信关键字(xml格式)
+	String entityKey;	// 实体关键字(驼峰命名)
 	
 	WxPay(String wxKey, String entityKey) {
 		this.wxKey = wxKey;

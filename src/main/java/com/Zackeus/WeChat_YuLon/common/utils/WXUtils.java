@@ -11,9 +11,13 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.bouncycastle.util.Arrays;
 
 import com.alibaba.fastjson.JSON;
-import com.Zackeus.WeChat_YuLon.common.config.WeChatConfig;
-import com.Zackeus.WeChat_YuLon.common.config.WxPayConfig;
+import com.Zackeus.WeChat_YuLon.common.entity.HttpClientResult;
+import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpClientUtil;
+import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
+import com.Zackeus.WeChat_YuLon.common.utils.httpClient.Md5Util;
+import com.Zackeus.WeChat_YuLon.modules.wechat.config.WeChatConfig;
 import com.Zackeus.WeChat_YuLon.modules.wechat.config.WxPay;
+import com.Zackeus.WeChat_YuLon.modules.wechat.config.WxPayConfig;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatOrder;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;
 
@@ -28,11 +32,15 @@ import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;
 public class WXUtils {
 
 	private static int BAES_KEY_BYTE = 16;
+	
+	private static String SUCCESS_CODE = "SUCCESS";
+	private static String OK_CODE = "OK";
 
 	/**
 	 * 
 	 * @Title：decryptEncryptedData
-	 * @Description: TODO(解密用户加密数据) @see： 对称解密使用的算法为 AES-128-CBC，数据采用PKCS#7填充。
+	 * @Description: TODO(解密用户加密数据) 
+	 * @see： 对称解密使用的算法为 AES-128-CBC，数据采用PKCS#7填充。
 	 *               对称解密的目标密文为 Base64_Decode(encryptedData)。 对称解密秘钥 aeskey =
 	 *               Base64_Decode(session_key), aeskey 是16字节。 对称解密算法初始向量
 	 *               为Base64_Decode(iv)，其中iv由数据接口返回。
@@ -131,17 +139,45 @@ public class WXUtils {
 	}
 
 	/**
-	 * 签名字符串
 	 * 
-	 * @param text需要签名的字符串
-	 * @param key
-	 *            密钥
-	 * @param input_charset编码格式
-	 * @return 签名结果
+	 * @Title：sign
+	 * @Description: TODO(签名字符串)
+	 * @see：
+	 * @param text 需要签名的字符串
+	 * @param key 密钥
+	 * @return
 	 */
 	public static String sign(String text, String key) {
-		text = text + "&key=" + key;
+		text = text + "&" + WxPay.KEY.getWxKey() + "=" + key;
 		return DigestUtils.md5Hex(StringUtils.getBytes(text)).toUpperCase();
+	}
+	
+	/**
+	 * 
+	 * @Title：paySign
+	 * @Description: TODO(支付参数)
+	 * @see：
+	 * @param prepayId 预支付交易会话标识
+	 * @param nonceStr 随机字符串
+	 * @param wxPayConfig 
+	 * @param weChatConfig
+	 * @return
+	 */
+	public static Map<String, String> createPayMap(String prepayId, String nonceStr, 
+			WxPayConfig wxPayConfig, WeChatConfig weChatConfig) {
+		Long timeStamp = System.currentTimeMillis() / 1000;
+		Map<String, String> resMap = new HashMap<String, String>();
+		
+        resMap.put(WxPay.NONCE_STR.getEntityKey(), nonceStr);
+        resMap.put(WxPay.PACKAGE.getEntityKey(), WxPay.PREPAY_ID.getWxKey() + "=" + prepayId);
+        resMap.put(WxPay.SIGN_TYPE.getEntityKey(), Md5Util.MD5);								
+        resMap.put(WxPay.TIME_STAMP.getEntityKey(), String.valueOf(timeStamp));			
+        // 拼接签名需要的参数
+        resMap.put(WxPay.APP_ID.getEntityKey(), weChatConfig.getAppId());
+        resMap.put(WxPay.PAY_SIGN.getEntityKey(), sign(createLinkString(resMap), wxPayConfig.getKey()));
+        // 返回时移除appId参数
+        resMap.remove(WxPay.APP_ID.getEntityKey());
+		return resMap;
 	}
 	
 	/**
@@ -164,6 +200,33 @@ public class WXUtils {
 			result.put(key, value);
 		}
 		return result;
+	}
+	
+	/**
+	 * 
+	 * @Title：orderPay
+	 * @Description: TODO(微信支付统一下单)
+	 * @see：
+	 * @param weChatOrder
+	 * @param weChatConfig
+	 * @param wxPayConfig
+	 * @return
+	 * @throws Exception
+	 */
+	public static Map<String, String> orderPay(WeChatOrder weChatOrder, WeChatConfig weChatConfig, WxPayConfig wxPayConfig) throws Exception {
+		String xml = createSignedXml(wxPayConfig, createMap(weChatOrder, weChatConfig, wxPayConfig));
+		AssertUtil.isTrue(StringUtils.isNotBlank(xml), HttpStatus.SC_INTERNAL_SERVER_ERROR, "统一下单签名失败");
+		// 调用统一下单接口，并接受返回的结果
+        HttpClientResult result = HttpClientUtil.doPostXml(wxPayConfig.getPay_url(), xml);
+        AssertUtil.isTrue(HttpStatus.SC_OK == result.getCode(), result.getCode(), "统一下单接口请求失败");
+        Map<String, String> map = XmlUtil.xmlToMap(result.getContent());
+        AssertUtil.isTrue(ObjectUtils.isNotEmpty(map), HttpStatus.SC_INTERNAL_SERVER_ERROR, "解析统一下单XML信息失败");
+        AssertUtil.isTrue(StringUtils.equals(SUCCESS_CODE, map.get(WxPay.RETURN_CODE.getWxKey())) &&
+        		StringUtils.equals(OK_CODE, map.get(WxPay.RETURN_MSG.getWxKey())), 
+        		HttpStatus.SC_INTERNAL_SERVER_ERROR, "统一下单失败: " + map.get(WxPay.RETURN_MSG.getWxKey()));
+        AssertUtil.isTrue(ObjectUtils.isEmpty(map.get(WxPay.ERR_CODE.getWxKey())), 
+        		HttpStatus.SC_INTERNAL_SERVER_ERROR, "统一下单失败: " + map.get(WxPay.ERR_CODE_DES.getWxKey()));
+        return createPayMap(map.get(WxPay.PREPAY_ID.getWxKey()), weChatOrder.getNonceStr(), wxPayConfig, weChatConfig);
 	}
 
 }

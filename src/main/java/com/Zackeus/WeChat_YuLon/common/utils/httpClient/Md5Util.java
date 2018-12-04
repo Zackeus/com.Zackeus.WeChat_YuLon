@@ -19,13 +19,16 @@ import com.Zackeus.WeChat_YuLon.common.utils.Logs;
  * @date 2018年7月6日 上午11:11:20
  */
 public class Md5Util {
+	
+	public static final String MD5 = "MD5";
+	
 	private static char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
 			'f' };
 	private static MessageDigest messagedigest = null;
 
 	static {
 		try {
-			messagedigest = MessageDigest.getInstance("MD5");
+			messagedigest = MessageDigest.getInstance(MD5);
 		} catch (NoSuchAlgorithmException e) {
 			Logs.error("MD5FileUtil messagedigest初始化失败: " + e.getMessage());
 		}

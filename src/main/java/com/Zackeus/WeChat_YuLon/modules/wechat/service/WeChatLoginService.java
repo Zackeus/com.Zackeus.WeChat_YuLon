@@ -7,11 +7,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.Zackeus.WeChat_YuLon.common.config.WeChatConfig;
 import com.Zackeus.WeChat_YuLon.common.service.CrudService;
 import com.Zackeus.WeChat_YuLon.common.utils.Logs;
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpClientUtil;
+import com.Zackeus.WeChat_YuLon.modules.wechat.config.WeChatConfig;
 import com.Zackeus.WeChat_YuLon.modules.wechat.dao.WeChatLoginDao;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.OrderDetail;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatRegister;

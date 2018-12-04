@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.Zackeus.WeChat_YuLon.common.config.WxPayConfig;
 import com.Zackeus.WeChat_YuLon.common.entity.AjaxResult;
 import com.Zackeus.WeChat_YuLon.common.utils.IdGen;
 import com.Zackeus.WeChat_YuLon.common.utils.Logs;
@@ -27,6 +26,7 @@ import com.Zackeus.WeChat_YuLon.common.utils.XmlUtil;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 import com.Zackeus.WeChat_YuLon.common.web.BaseHttpController;
 import com.Zackeus.WeChat_YuLon.modules.sys.utils.UserUtils;
+import com.Zackeus.WeChat_YuLon.modules.wechat.config.WxPayConfig;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatOrder;
 import com.Zackeus.WeChat_YuLon.modules.wechat.service.OrderService;
 
@@ -81,13 +81,14 @@ public class OrderController extends BaseHttpController {
 		
 		weChatOrder.setTotalFee(1);
 		
-		weChatOrder.setOpenId(UserUtils.getPrincipal().getOpenId());;
+		weChatOrder.setOpenId(UserUtils.getPrincipal().getOpenId());
+		
 		weChatOrder.setOutTradeNo(IdGen.getOrder("OR"));
 		weChatOrder.setNonceStr(IdGen.randomBase62(32));
 		weChatOrder.setSpbillCreateIp(WebUtils.getIpAddress(request));
 		weChatOrder.setBody("测试商品名称");
 		
-		Map<String, String> resMap = orderService.unifiedOrder(weChatOrder);
+		Map<String, String> resMap = orderService.repayOrder(weChatOrder);
 		renderString(response, new AjaxResult(HttpStatus.SC_SUCCESS, "下单成功", resMap));
 	}
 	
@@ -114,9 +115,11 @@ public class OrderController extends BaseHttpController {
         String notityXml = sb.toString();
         String resXml = "";
         
-        Logs.info("接收到的报文：" + notityXml);
- 
         Map<String, String> map = XmlUtil.xmlToMap(notityXml);
+        
+        for(Map.Entry<String, String> entry : map.entrySet()) {
+        	Logs.info(entry.getKey() + " : " + entry.getValue());
+        }
  
         String returnCode = (String) map.get("return_code");
         if("SUCCESS".equals(returnCode)) {

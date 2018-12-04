@@ -4,7 +4,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import com.Zackeus.WeChat_YuLon.common.config.WeChatConfig;
 import com.Zackeus.WeChat_YuLon.common.security.BaseFilter;
 import com.Zackeus.WeChat_YuLon.common.utils.AssertUtil;
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
@@ -13,6 +12,7 @@ import com.Zackeus.WeChat_YuLon.common.utils.WebUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.exception.MyException;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 import com.Zackeus.WeChat_YuLon.modules.sys.security.LoginAuthenticationFilter;
+import com.Zackeus.WeChat_YuLon.modules.wechat.config.WeChatConfig;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;
 
 /**
