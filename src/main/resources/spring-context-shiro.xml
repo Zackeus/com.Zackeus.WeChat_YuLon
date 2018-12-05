@@ -26,7 +26,7 @@
                 <!-- 对静态资源设置匿名访问 -->
                 /static/** = anon
                 /wechat/sys/verify = anon <!-- 微信用户身份核实 -->
-                /order/wxNotify = wxNotify <!-- 微信支付结果通知 -->
+                /wechat/pay/wxNotify = wxNotify <!-- 微信支付结果通知 -->
                 /wechat/sys/** = wechat
                 /sys/login = authc <!-- 未登录请求拦截 -->
                 /** = user

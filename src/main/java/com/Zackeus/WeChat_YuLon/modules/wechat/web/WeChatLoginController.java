@@ -63,9 +63,9 @@ public class WeChatLoginController extends BaseHttpController {
 	public void verify(@Validated({ Default.class }) @RequestBody WeChatRegister weChatRegister, HttpSession session,
 			HttpServletRequest request, HttpServletResponse response) {
 
-		weChatRegister.setName("蔡海卫");
-		weChatRegister.setIdCard("130424198609182616");
-		weChatRegister.setPhoneNum("17331066367");
+		weChatRegister.setName("王洁");
+		weChatRegister.setIdCard("610121198909074245");
+		weChatRegister.setPhoneNum("15029673125");
 
 		// 根据待核实身份信息查询符合的合同号列表
 		List<OrderDetail> orderDetails = weChatService.getOrderDetails(weChatRegister);

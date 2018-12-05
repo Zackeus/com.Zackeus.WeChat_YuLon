@@ -36,7 +36,6 @@ public class WeChatNotifyFilter extends BaseFilter {
 	
 	@Override
 	protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
-		
 		String xml = IOUtils.toString(request.getInputStream(), request.getCharacterEncoding());
 		
 		AssertUtil.isTrue(StringUtils.isNotBlank(xml), HttpStatus.SC_BAD_REQUEST, "报文为空");
