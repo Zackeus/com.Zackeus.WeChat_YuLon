@@ -14,18 +14,19 @@ public class WeChatOrder extends DataEntity<WeChatOrder> {
 
 	private static final long serialVersionUID = 1L;
 
-	private String outTradeNo;		// 商户订单号
-	private String appId;			// 小程序ID
-	private String mchId;			// 商户号
-	private String openId;			// 用户标识
-	private Integer totalFee;		// 标价金额(单位：分)
-	private String tradeType;		// 交易类型
-	private String body;			// 商品描述
-	private String nonceStr;		// 随机字符串
-	private String spbillCreateIp;	// 终端IP
-	private String notifyUrl;		// 通知地址
-	private String sign;			// 签名
-	private String signType;		// 签名类型
+	private String outTradeNo;				// 商户订单号
+	private String appId;					// 小程序ID
+	private String mchId;					// 商户号
+	private String openId;					// 用户标识
+	private Integer totalFee;				// 标价金额(单位：分)
+	private String tradeType;				// 交易类型
+	private String body;					// 商品描述
+	private String nonceStr;				// 随机字符串
+	private String spbillCreateIp;			// 终端IP
+	private String notifyUrl;				// 通知地址
+	private String sign;					// 签名
+	private String signType;				// 签名类型
+	private OrderRepayPlan overdueContract; // 逾期合同
 
 	public WeChatOrder() {
 		super();
@@ -148,4 +149,12 @@ public class WeChatOrder extends DataEntity<WeChatOrder> {
 		this.signType = signType;
 	}
 
+	public OrderRepayPlan getOverdueContract() {
+		return overdueContract;
+	}
+
+	public void setOverdueContract(OrderRepayPlan overdueContract) {
+		this.overdueContract = overdueContract;
+	}
+	
 }

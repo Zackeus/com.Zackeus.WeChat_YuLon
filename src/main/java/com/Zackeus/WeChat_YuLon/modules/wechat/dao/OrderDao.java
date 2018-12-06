@@ -27,8 +27,12 @@ public interface OrderDao extends CrudDao<OrderDetail> {
 	
 	List<OrderRepayPlan> getOrderRepayPlanParameter(String sql);
 	
-	List<OrderRepayPlan> getOverdueOrderRepay();
+	List<OrderRepayPlan> getOverdueOrderRepays();
 	
-	List<OrderRepayPlan> getOverdueOrderRepayParameter(String sql);
+	List<OrderRepayPlan> getOverdueOrderRepaysParameter(String sql);
+	
+	OrderRepayPlan getOverdueOrderRepay();
+	
+	OrderRepayPlan getOverdueOrderRepayParameter(String sql);
 	
 }

@@ -69,15 +69,30 @@ public class OrderService extends CrudService<OrderDao, OrderDetail> {
 	/**
 	 * 
 	 * @Title：getOvderdueOrderRepay
-	 * @Description: TODO(查询逾期还款)
+	 * @Description: TODO(根据合同号查询逾期还款列表)
 	 * @see：
 	 * @param externalContractNbr
 	 * @return
 	 */
-	public List<OrderRepayPlan> getOverdueOrderRepay(String externalContractNbr) {
-		String sqlcode = sqlSessionFactory .getConfiguration().getMappedStatement("com.Zackeus.WeChat_YuLon.modules.wechat.dao.OrderDao.getOverdueOrderRepay")
+	public List<OrderRepayPlan> getOverdueOrderRepays(String externalContractNbr) {
+		String sqlcode = sqlSessionFactory .getConfiguration().getMappedStatement("com.Zackeus.WeChat_YuLon.modules.wechat.dao.OrderDao.getOverdueOrderRepays")
 				.getBoundSql(null).getSql();
 		sqlcode = sqlcode.replace("{externalContractNbr}", externalContractNbr);
+		return dao.getOverdueOrderRepaysParameter(sqlcode);
+	}
+	
+	/**
+	 * 
+	 * @Title：getOverdueOrderRepay
+	 * @Description: TODO(根据合同号和期数查询逾期合同)
+	 * @see：
+	 * @return
+	 */
+	public OrderRepayPlan getOverdueOrderRepay(OrderRepayPlan orderRepayPlan) {
+		String sqlcode = sqlSessionFactory .getConfiguration().getMappedStatement("com.Zackeus.WeChat_YuLon.modules.wechat.dao.OrderDao.getOverdueOrderRepay")
+				.getBoundSql(null).getSql();
+		sqlcode = sqlcode.replace("{externalContractNbr}", orderRepayPlan.getExternalContractNbr());
+		sqlcode = sqlcode.replace("{rentalId}", String.valueOf(orderRepayPlan.getRentalId()));
 		return dao.getOverdueOrderRepayParameter(sqlcode);
 	}
 	
@@ -96,9 +111,13 @@ public class OrderService extends CrudService<OrderDao, OrderDetail> {
 		List<OrderDetail> overdueOrders = new ArrayList<>();
 		for (OrderDetail orerDetail : orderDetails) {
 			OrderDetail overdueOrderDetail = dao.getByPrinciple(orerDetail.getExternalContractNbr(), weChatRegister.getOpenId());
-			if (ObjectUtils.isNotEmpty(orerDetail))
-				overdueOrderDetail.setOrderRepayPlans(getOverdueOrderRepay(orerDetail.getExternalContractNbr()));
-			overdueOrders.add(overdueOrderDetail);
+			if (ObjectUtils.isNotEmpty(orerDetail)) {
+				List<OrderRepayPlan> orderRepayPlans = getOverdueOrderRepays(orerDetail.getExternalContractNbr());
+				if (ObjectUtils.isNotEmpty(orderRepayPlans)) {
+					overdueOrderDetail.setOrderRepayPlans(orderRepayPlans);
+					overdueOrders.add(overdueOrderDetail);
+				}
+			}
 		}
 		return overdueOrders;
 	}

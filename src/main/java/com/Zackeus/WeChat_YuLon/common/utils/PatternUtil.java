@@ -29,6 +29,11 @@ public class PatternUtil {
 	private static final String PATTEN_URL = "^([hH][tT]{2}[pP]:/*|[hH][tT]{2}[pP][sS]:/*|[fF][tT][pP]:/*)(([A-Za-z0-9-~]+).)+([A-Za-z0-9-~\\/])+(\\?{0,1}(([A-Za-z0-9-~]+\\={0,1})([A-Za-z0-9-~]*)\\&{0,1})*)$";
 
 	/**
+	 * 金额正则
+	 */
+	private static final String MONEY = "^\\d+(\\.\\d{1,2})?$";
+	
+	/**
 	 * 
 	 * @Title：name
 	 * @Description: TODO(正则校验) @see：
@@ -74,6 +79,18 @@ public class PatternUtil {
 	 */
 	public static Boolean isIdCard(String value) {
 		return check(ID_CARD, value);
+	}
+	
+	/**
+	 * 
+	 * @Title：isMoney
+	 * @Description: TODO(金额正则)
+	 * @see：
+	 * @param value
+	 * @return
+	 */
+	public static Boolean isMoney(String value) {
+		return check(MONEY, value);
 	}
 
 	public static void main(String[] args) {
