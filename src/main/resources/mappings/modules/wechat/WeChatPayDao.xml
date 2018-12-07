@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.Zackeus.WeChat_YuLon.modules.wechat.dao.WeChatPayDao">
+
+    <sql id="weChatOrderColumns">
+    	[OUT_TRADE_NO],
+      	[OPEN_ID],
+      	[EXTERNAL_CONTRACT_NBR],
+      	[RENTAL_ID],
+      	[TOTAL_FEE],
+      	[BODY],
+      	[NONCE_STR],
+      	[SPBILL_CREATE_IP],
+      	[CREATE_DATE],
+      	[UPDATE_DATE],
+      	[REMARKS],
+      	[RESULT]
+    </sql>
+    
+    <sql id="getWeChatOrderColumns">
+    	[OUT_TRADE_NO],
+      	[OPEN_ID],
+      	[EXTERNAL_CONTRACT_NBR] AS "overdueContract.externalContractNbr",
+      	[RENTAL_ID] AS "overdueContract.rentalId",
+      	[TOTAL_FEE],
+      	[BODY],
+      	[NONCE_STR],
+      	[SPBILL_CREATE_IP],
+      	[CREATE_DATE],
+      	[UPDATE_DATE],
+      	[REMARKS],
+      	[RESULT]
+    </sql>
+    
+    <sql id="weChatNotifyColumns">
+    	[TRANSACTION_ID],
+      	[OUT_TRADE_NO],
+      	[APP_ID],
+      	[MCH_ID],
+      	[OPEN_ID],
+      	[TOTAL_FEE],
+      	[SETTLEMENT_TOTAL_FEE],
+      	[CASH_FEE],
+      	[FEE_TYPE],
+      	[DEVICE_INFO],
+      	[NONCE_STR],
+      	[SIGN],
+      	[SIGN_TYPE],
+      	[IS_SUBSCRIBE],
+      	[TRADE_TYPE],
+      	[BANK_TYPE],
+      	[ATTACH],
+      	[TIME_END],
+      	[RETURN_CODE],
+      	[RETURN_MSG],
+      	[RESULT_CODE],
+      	[ERR_CODE],
+      	[ERR_CODE_DES]
+    </sql>
+    
+	<!-- 插入微信支付订单 -->
+	<insert id="insert">
+		INSERT INTO [WeChat].[dbo].[WECHAT_ORDER]
+		(<include refid="weChatOrderColumns"/>)
+		VALUES(	
+			#{outTradeNo},
+			#{openId},
+			#{overdueContract.externalContractNbr},
+			#{overdueContract.rentalId},
+			#{totalFee},
+			#{body},
+			#{nonceStr},
+			#{spbillCreateIp},
+			#{createDate},
+			#{updateDate},
+			#{remarks},
+			#{result})
+	</insert>
+	
+	<!-- 根据商户订单号查询 -->
+	<select id="get" resultType="WeChatOrder">
+		SELECT 
+		<include refid="getWeChatOrderColumns"/>
+		FROM [WeChat].[dbo].[WECHAT_ORDER]
+		WHERE [OUT_TRADE_NO] = #{outTradeNo}
+	</select>
+	
+	<!-- 更新订单状态 -->
+	<update id="update">
+		UPDATE [WeChat].[dbo].[WECHAT_ORDER]
+		SET
+		[UPDATE_DATE] = #{updateDate},
+		[RESULT] = #{result}
+		WHERE [OUT_TRADE_NO] = #{outTradeNo}
+	</update>
+	
+	<!-- 支付通知插入 -->
+	<insert id="insertNotify" parameterType="WeChatNotify">
+		INSERT INTO [WeChat].[dbo].[WECHAT_NOTIFY]
+		(<include refid="weChatNotifyColumns"/>)
+		VALUES(	
+			#{weChatNotify.transactionId},
+			#{weChatNotify.outTradeNo},
+			#{weChatNotify.appId},
+			#{weChatNotify.mchId},
+			#{weChatNotify.openId},
+			#{weChatNotify.totalFee},
+			#{weChatNotify.settlementTotalFee},
+			#{weChatNotify.cashFee},
+			#{weChatNotify.feeType},
+			#{weChatNotify.deviceInfo},
+			#{weChatNotify.nonceStr},
+			#{weChatNotify.sign},
+			#{weChatNotify.signType},
+			#{weChatNotify.isSubscribe},
+			#{weChatNotify.tradeType},
+			#{weChatNotify.bankType},
+			#{weChatNotify.attach},
+			#{weChatNotify.timeEnd},
+			#{weChatNotify.returnCode},
+			#{weChatNotify.returnMsg},
+			#{weChatNotify.resultCode},
+			#{weChatNotify.errCode},
+			#{weChatNotify.errCodeDes})
+	</insert>
+	
+	<!-- 根据微信订单号查询通知信息 -->
+	<select id="getNotifyByTransactionId" resultType="WeChatNotify">
+		SELECT 
+		<include refid="weChatNotifyColumns"/>
+		FROM [WeChat].[dbo].[WECHAT_NOTIFY]
+		WHERE [TRANSACTION_ID] = #{transactionId}
+	</select>
+	
+</mapper>  

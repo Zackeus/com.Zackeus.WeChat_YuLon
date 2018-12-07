@@ -24,7 +24,6 @@ import com.Zackeus.WeChat_YuLon.common.utils.IdGen;
 import com.Zackeus.WeChat_YuLon.common.utils.Logs;
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.StringUtils;
-import com.Zackeus.WeChat_YuLon.common.utils.WXUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 import com.Zackeus.WeChat_YuLon.common.web.BaseHttpController;
 import com.Zackeus.WeChat_YuLon.modules.wechat.config.WeChatConfig;
@@ -32,6 +31,7 @@ import com.Zackeus.WeChat_YuLon.modules.wechat.entity.OrderDetail;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatRegister;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;
 import com.Zackeus.WeChat_YuLon.modules.wechat.service.WeChatLoginService;
+import com.Zackeus.WeChat_YuLon.modules.wechat.utils.WXUtils;
 
 /**
  * 

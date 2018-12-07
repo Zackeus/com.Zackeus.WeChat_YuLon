@@ -11,6 +11,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import com.Zackeus.WeChat_YuLon.common.utils.JsonMapper;
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.StreamUtils;
 
@@ -38,7 +39,7 @@ public class MyHttpServletRequestWrapper extends HttpServletRequestWrapper {
 	public MyHttpServletRequestWrapper(HttpServletRequest request, Object object, String charset) {
 		super(request);
 		try {
-			requestBody = object.toString().getBytes(charset);
+			requestBody = JsonMapper.toJsonString(object).getBytes(charset);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}

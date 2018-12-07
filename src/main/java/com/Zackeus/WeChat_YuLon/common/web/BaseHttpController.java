@@ -22,11 +22,13 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.Zackeus.WeChat_YuLon.common.entity.AjaxResult;
+import com.Zackeus.WeChat_YuLon.common.entity.XMLResult;
 import com.Zackeus.WeChat_YuLon.common.utils.JsonMapper;
 import com.Zackeus.WeChat_YuLon.common.utils.Logs;
 import com.Zackeus.WeChat_YuLon.common.utils.StringUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.WebUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.exception.MyException;
+import com.Zackeus.WeChat_YuLon.common.utils.exception.XmlException;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 
 /**
@@ -291,6 +293,21 @@ public abstract class BaseHttpController extends BaseController {
 	@ExceptionHandler({ MyException.class })
 	public String schedulerException(HttpServletRequest request, HttpServletResponse response, MyException e) {
 		return renderJson(response, new AjaxResult(e.getErrorCode(), e.getMessage(), e.getObject()));
+	}
+	
+	/**
+	 * 
+	 * @Title：xmlException
+	 * @Description: TODO(XML信息异常)
+	 * @see：
+	 * @param request
+	 * @param response
+	 * @param e
+	 * @return
+	 */
+	@ExceptionHandler({ XmlException.class })
+	public String xmlException(HttpServletRequest request, HttpServletResponse response, XmlException e) {
+		return renderXML(response, new XMLResult(e.getErrorCode(), e.getMessage()).toCommonString());
 	}
 	
 	/**

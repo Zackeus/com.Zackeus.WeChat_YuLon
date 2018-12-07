@@ -1,7 +1,10 @@
 package com.Zackeus.WeChat_YuLon.modules.wechat.dao;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.Zackeus.WeChat_YuLon.common.annotation.MyBatisDao;
 import com.Zackeus.WeChat_YuLon.common.dao.CrudDao;
+import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatNotify;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatOrder;
 
 /**
@@ -14,5 +17,9 @@ import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatOrder;
  */
 @MyBatisDao
 public interface WeChatPayDao extends CrudDao<WeChatOrder> {
+	
+	int insertNotify(@Param("weChatNotify") WeChatNotify weChatNotify);
+	
+	WeChatNotify getNotifyByTransactionId(String transactionId);
 
 }

@@ -15,18 +15,13 @@ public class WeChatOrder extends DataEntity<WeChatOrder> {
 	private static final long serialVersionUID = 1L;
 
 	private String outTradeNo;				// 商户订单号
-	private String appId;					// 小程序ID
-	private String mchId;					// 商户号
 	private String openId;					// 用户标识
 	private Integer totalFee;				// 标价金额(单位：分)
-	private String tradeType;				// 交易类型
 	private String body;					// 商品描述
 	private String nonceStr;				// 随机字符串
 	private String spbillCreateIp;			// 终端IP
-	private String notifyUrl;				// 通知地址
-	private String sign;					// 签名
-	private String signType;				// 签名类型
 	private OrderRepayPlan overdueContract; // 逾期合同
+	private boolean result;					// 支付结果
 
 	public WeChatOrder() {
 		super();
@@ -35,22 +30,23 @@ public class WeChatOrder extends DataEntity<WeChatOrder> {
 	public WeChatOrder(String id) {
 		super(id);
 	}
-
-	public WeChatOrder(String outTradeNo, String appId, String mchId, String openId, Integer totalFee, String tradeType,
-			String body, String nonceStr, String spbillCreateIp, String notifyUrl, String sign, String signType) {
+	
+	public WeChatOrder(String outTradeNo, String openId, Integer totalFee, String body, String nonceStr,
+			String spbillCreateIp, OrderRepayPlan overdueContract, boolean result) {
 		super();
 		this.outTradeNo = outTradeNo;
-		this.appId = appId;
-		this.mchId = mchId;
 		this.openId = openId;
 		this.totalFee = totalFee;
-		this.tradeType = tradeType;
 		this.body = body;
 		this.nonceStr = nonceStr;
 		this.spbillCreateIp = spbillCreateIp;
-		this.notifyUrl = notifyUrl;
-		this.sign = sign;
-		this.signType = signType;
+		this.overdueContract = overdueContract;
+		this.result = result;
+	}
+
+	public WeChatOrder (OrderRepayPlan overdueContract) {
+		super();
+		this.overdueContract = overdueContract;
 	}
 
 	public String getOutTradeNo() {
@@ -59,22 +55,6 @@ public class WeChatOrder extends DataEntity<WeChatOrder> {
 
 	public void setOutTradeNo(String outTradeNo) {
 		this.outTradeNo = outTradeNo;
-	}
-
-	public String getAppId() {
-		return appId;
-	}
-
-	public void setAppId(String appId) {
-		this.appId = appId;
-	}
-
-	public String getMchId() {
-		return mchId;
-	}
-
-	public void setMchId(String mchId) {
-		this.mchId = mchId;
 	}
 
 	public String getOpenId() {
@@ -91,14 +71,6 @@ public class WeChatOrder extends DataEntity<WeChatOrder> {
 
 	public void setTotalFee(Integer totalFee) {
 		this.totalFee = totalFee;
-	}
-
-	public String getTradeType() {
-		return tradeType;
-	}
-
-	public void setTradeType(String tradeType) {
-		this.tradeType = tradeType;
 	}
 
 	public String getBody() {
@@ -125,36 +97,20 @@ public class WeChatOrder extends DataEntity<WeChatOrder> {
 		this.spbillCreateIp = spbillCreateIp;
 	}
 
-	public String getNotifyUrl() {
-		return notifyUrl;
-	}
-
-	public void setNotifyUrl(String notifyUrl) {
-		this.notifyUrl = notifyUrl;
-	}
-
-	public String getSign() {
-		return sign;
-	}
-
-	public void setSign(String sign) {
-		this.sign = sign;
-	}
-
-	public String getSignType() {
-		return signType;
-	}
-
-	public void setSignType(String signType) {
-		this.signType = signType;
-	}
-
 	public OrderRepayPlan getOverdueContract() {
 		return overdueContract;
 	}
 
 	public void setOverdueContract(OrderRepayPlan overdueContract) {
 		this.overdueContract = overdueContract;
+	}
+
+	public boolean isResult() {
+		return result;
+	}
+
+	public void setResult(boolean result) {
+		this.result = result;
 	}
 	
 }

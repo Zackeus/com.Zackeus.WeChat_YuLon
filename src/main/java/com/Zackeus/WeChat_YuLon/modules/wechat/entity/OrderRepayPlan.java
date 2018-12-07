@@ -4,16 +4,12 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.validation.GroupSequence;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.Zackeus.WeChat_YuLon.common.annotation.validator.Money;
-import com.Zackeus.WeChat_YuLon.common.service.valid.First;
-import com.Zackeus.WeChat_YuLon.common.service.valid.Second;
-import com.Zackeus.WeChat_YuLon.common.service.valid.Third;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
@@ -24,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  * @author zhou.zhang
  * @date 2018年11月14日 下午6:06:40
  */
-@GroupSequence({OrderRepayPlan.class, First.class, Second.class, Third.class})
 public class OrderRepayPlan implements Serializable {
 
 	private static final long serialVersionUID = 1L;

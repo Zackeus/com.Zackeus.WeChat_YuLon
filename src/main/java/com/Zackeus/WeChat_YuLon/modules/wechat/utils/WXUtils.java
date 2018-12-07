@@ -1,6 +1,7 @@
-package com.Zackeus.WeChat_YuLon.common.utils;
+package com.Zackeus.WeChat_YuLon.modules.wechat.utils;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,12 +13,20 @@ import org.bouncycastle.util.Arrays;
 
 import com.alibaba.fastjson.JSON;
 import com.Zackeus.WeChat_YuLon.common.entity.HttpClientResult;
+import com.Zackeus.WeChat_YuLon.common.utils.AssertUtil;
+import com.Zackeus.WeChat_YuLon.common.utils.Encodes;
+import com.Zackeus.WeChat_YuLon.common.utils.Logs;
+import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
+import com.Zackeus.WeChat_YuLon.common.utils.StringUtils;
+import com.Zackeus.WeChat_YuLon.common.utils.WebUtils;
+import com.Zackeus.WeChat_YuLon.common.utils.XmlUtil;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpClientUtil;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.Md5Util;
 import com.Zackeus.WeChat_YuLon.modules.wechat.config.WeChatConfig;
 import com.Zackeus.WeChat_YuLon.modules.wechat.config.WxPay;
 import com.Zackeus.WeChat_YuLon.modules.wechat.config.WxPayConfig;
+import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatNotify;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatOrder;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;
 
@@ -33,9 +42,9 @@ public class WXUtils {
 
 	private static int BAES_KEY_BYTE = 16;
 	
-	public static String SUCCESS_CODE = "SUCCESS";
-	public static String OK_CODE = "OK";
-	public static String FAIL_CODE = "FAIL";
+	public static final String SUCCESS_CODE = "SUCCESS";
+	public static final String OK_CODE = "OK";
+	public static final String FAIL_CODE = "FAIL";
 
 	/**
 	 * 
@@ -205,6 +214,41 @@ public class WXUtils {
 	
 	/**
 	 * 
+	 * @Title：createTotalFee
+	 * @Description: TODO(生成标价金额)
+	 * @see：微信支付金额单位为分，将单位为元的BigDecimal转为单位为分的金额单位
+	 * @param totalFee
+	 * @return
+	 */
+	public static int createTotalFee(BigDecimal totalFee) {
+		try {
+			return Integer.valueOf(String.valueOf(totalFee.multiply(new BigDecimal(100)).stripTrailingZeros().toPlainString()));
+		} catch (Exception e) {
+			Logs.error("微信支付金额转换异常：" + Logs.toLog(e));
+			return 0;
+		}
+	}
+	
+	/**
+	 * 
+	 * @Title：WeChatNotifyValidate
+	 * @Description: TODO(微信支付通知信息校验)
+	 * @see：
+	 * @param weChatNotify
+	 */
+	public static void weChatNotifyValidate(WeChatNotify weChatNotify) {
+		AssertUtil.isXmlTrue(StringUtils.isNotBlank(weChatNotify.getTransactionId()), FAIL_CODE, "微信订单号不能为空");
+		AssertUtil.isXmlTrue(StringUtils.isNotBlank(weChatNotify.getOutTradeNo()), FAIL_CODE, "商户订单号不能为空");
+		AssertUtil.isXmlTrue(StringUtils.isNotBlank(weChatNotify.getMchId()), FAIL_CODE, "商户号不能为空");
+		AssertUtil.isXmlTrue(StringUtils.isNotBlank(weChatNotify.getOpenId()), FAIL_CODE, "用户标识不能为空");
+		AssertUtil.isXmlTrue(ObjectUtils.isNotEmpty(weChatNotify.getTotalFee()), FAIL_CODE, "订单金额不能为空");
+		AssertUtil.isXmlTrue(ObjectUtils.isNotEmpty(weChatNotify.getCashFee()), FAIL_CODE, "现金支付金额不能为空");
+		AssertUtil.isXmlTrue(StringUtils.isNotBlank(weChatNotify.getReturnCode()), FAIL_CODE, "返回状态码不能为空");
+		AssertUtil.isXmlTrue(StringUtils.isNotBlank(weChatNotify.getResultCode()), FAIL_CODE, "业务结果码不能为空");
+	}
+	
+	/**
+	 * 
 	 * @Title：orderPay
 	 * @Description: TODO(微信支付统一下单)
 	 * @see：
@@ -229,5 +273,5 @@ public class WXUtils {
         		HttpStatus.SC_INTERNAL_SERVER_ERROR, "统一下单失败: " + map.get(WxPay.ERR_CODE_DES.getWxKey()));
         return createPayMap(map.get(WxPay.PREPAY_ID.getWxKey()), weChatOrder.getNonceStr(), wxPayConfig, weChatConfig);
 	}
-
+	
 }

@@ -4,6 +4,7 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.springframework.util.Assert;
 
 import com.Zackeus.WeChat_YuLon.common.utils.exception.MyException;
+import com.Zackeus.WeChat_YuLon.common.utils.exception.XmlException;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 
 /**
@@ -18,6 +19,11 @@ public class AssertUtil extends Assert {
 	
 	private static String DEFAULT_ASSERT_MSG = "关键参数不能为空";
 	
+	
+	public static void isXmlTrue(boolean expression, String code, String message) {
+		if (!expression)
+			throw new XmlException(code, message);
+	}	
 	
 	public static void isAuthenTrue(boolean expression, String message) {
 		if (!expression) {

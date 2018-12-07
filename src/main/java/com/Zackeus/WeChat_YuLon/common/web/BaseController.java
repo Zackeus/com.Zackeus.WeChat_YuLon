@@ -31,10 +31,12 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.Zackeus.WeChat_YuLon.common.entity.AjaxResult;
+import com.Zackeus.WeChat_YuLon.common.entity.XMLResult;
 import com.Zackeus.WeChat_YuLon.common.utils.DateUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.JsonMapper;
 import com.Zackeus.WeChat_YuLon.common.utils.WebUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.exception.MyException;
+import com.Zackeus.WeChat_YuLon.common.utils.exception.XmlException;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 import net.sf.json.JSONObject;
 
@@ -463,6 +465,24 @@ public abstract class BaseController {
 		} else {
 			return "sys/Error";
 		}
+	}
+	
+	/**
+	 * 
+	 * @Title：xmlException
+	 * @Description: TODO(XML信息异常)
+	 * @see：
+	 * @param request
+	 * @param response
+	 * @param e
+	 * @return
+	 */
+	@ExceptionHandler({ XmlException.class })
+	public String xmlException(HttpServletRequest request, HttpServletResponse response, XmlException e) {
+		if (WebUtils.isAjaxRequest(request))
+			return renderXML(response, new XMLResult(e.getErrorCode(), e.getMessage()).toCommonString());
+		else 
+			return "sys/Error";
 	}
 	
 	/**

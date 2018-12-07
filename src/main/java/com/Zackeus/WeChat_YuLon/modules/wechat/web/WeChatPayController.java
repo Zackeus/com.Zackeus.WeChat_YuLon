@@ -4,7 +4,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.groups.Default;
 
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +19,7 @@ import com.Zackeus.WeChat_YuLon.common.entity.AjaxResult;
 import com.Zackeus.WeChat_YuLon.common.entity.XMLResult;
 import com.Zackeus.WeChat_YuLon.common.utils.AssertUtil;
 import com.Zackeus.WeChat_YuLon.common.utils.IdGen;
-import com.Zackeus.WeChat_YuLon.common.utils.Logs;
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
-import com.Zackeus.WeChat_YuLon.common.utils.WXUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.WebUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 import com.Zackeus.WeChat_YuLon.common.web.BaseHttpController;
@@ -33,6 +30,7 @@ import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatNotify;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatOrder;
 import com.Zackeus.WeChat_YuLon.modules.wechat.service.OrderService;
 import com.Zackeus.WeChat_YuLon.modules.wechat.service.WeChatPayService;
+import com.Zackeus.WeChat_YuLon.modules.wechat.utils.WXUtils;
 
 /**
  * 
@@ -44,6 +42,7 @@ import com.Zackeus.WeChat_YuLon.modules.wechat.service.WeChatPayService;
  */
 @Controller
 @RequestMapping("/wechat/pay")
+@Validated
 public class WeChatPayController extends BaseHttpController {
 
 	@Autowired
@@ -62,7 +61,7 @@ public class WeChatPayController extends BaseHttpController {
 	 */
 	@RequiresPermissions("wechatUser")
 	@RequestMapping(value = "/overdueRepay", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE, method = RequestMethod.POST)
-	public void overdueRepay(@Validated({ Default.class }) @RequestBody OrderRepayPlan orderRepayPlan,
+	public void overdueRepay(@Validated @RequestBody OrderRepayPlan orderRepayPlan,
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		OrderDetail orderDetail = orderService.getByPrinciple(orderRepayPlan.getExternalContractNbr(),
@@ -70,20 +69,25 @@ public class WeChatPayController extends BaseHttpController {
 		AssertUtil.isTrue(ObjectUtils.isNotEmpty(orderDetail), HttpStatus.SC_UNKNOWN, "查无此合同");
 		OrderRepayPlan checkOrderRepayPlan = orderService.getOverdueOrderRepay(orderRepayPlan);
 		AssertUtil.isTrue(ObjectUtils.isNotEmpty(checkOrderRepayPlan), HttpStatus.SC_UNKNOWN, "查无此合同，可能已还款，请点击确定刷新确认");
-		AssertUtil.isTrue(orderRepayPlan.getTotal().compareTo(checkOrderRepayPlan.getTotal()) == 0, HttpStatus.SC_UNKNOWN, "支付金额与应付金额不符");
+		AssertUtil.isTrue(orderRepayPlan.getTotal().compareTo(checkOrderRepayPlan.getTotal()) == 0,
+				HttpStatus.SC_UNKNOWN, "支付金额与应付金额不符");
 
 		// 订单生成
-		WeChatOrder weChatOrder = new WeChatOrder();
-		weChatOrder.setTotalFee(1);
+		WeChatOrder weChatOrder = new WeChatOrder(checkOrderRepayPlan);
+
+		Integer totalFee = WXUtils.createTotalFee(weChatOrder.getOverdueContract().getTotal());
+		AssertUtil.isTrue(0 != totalFee, HttpStatus.SC_INTERNAL_SERVER_ERROR, "系统异常：金额转换失败");
+		weChatOrder.setTotalFee(totalFee);
+
 		weChatOrder.setOpenId(UserUtils.getPrincipal().getOpenId());
 		weChatOrder.setOutTradeNo(IdGen.getOrder("OR"));
 		weChatOrder.setNonceStr(IdGen.randomBase62(32));
 		weChatOrder.setSpbillCreateIp(WebUtils.getIpAddress(request));
-		weChatOrder.setBody("测试商品名称");
+		weChatOrder.setBody("逾期还款：" + weChatOrder.getOverdueContract().getExternalContractNbr() + ";"
+				+ weChatOrder.getOverdueContract().getRentalId() + ";" + weChatOrder.getOverdueContract().getTotal());
 
-//		renderJson(response, new AjaxResult(HttpStatus.SC_SUCCESS, "下单成功"));
-		 Map<String, String> resMap = weChatPayService.overdueRepay(weChatOrder);
-		 renderJson(response, new AjaxResult(HttpStatus.SC_SUCCESS, "下单成功", resMap));
+		Map<String, String> resMap = weChatPayService.overdueRepay(weChatOrder);
+		renderJson(response, new AjaxResult(HttpStatus.SC_SUCCESS, "下单成功", resMap));
 	}
 
 	/**
@@ -91,13 +95,15 @@ public class WeChatPayController extends BaseHttpController {
 	 * @Title：wxNotify
 	 * @Description: TODO(微信支付结果通知) @see：
 	 * @param request
-	 * @param response
+	 * @param response 
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/wxNotify", consumes = MediaType.TEXT_XML_VALUE, produces = MediaType.TEXT_XML_VALUE, method = RequestMethod.POST)
-	public void wxNotify(@XMLRequestBody WeChatNotify notity, HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-		Logs.info("接收数据：" + notity);
+	public void wxNotify(@XMLRequestBody WeChatNotify weChatNotify,
+			HttpServletRequest request, HttpServletResponse response) throws Exception {
+		// 通知信息校验
+		WXUtils.weChatNotifyValidate(weChatNotify);
+		weChatPayService.wxNotify(weChatNotify);
 		renderXML(response, new XMLResult(WXUtils.SUCCESS_CODE, WXUtils.OK_CODE).toCommonString());
 	}
 

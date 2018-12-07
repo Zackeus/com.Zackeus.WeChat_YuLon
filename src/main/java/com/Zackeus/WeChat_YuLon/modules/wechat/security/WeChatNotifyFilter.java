@@ -15,11 +15,11 @@ import com.Zackeus.WeChat_YuLon.common.security.BaseFilter;
 import com.Zackeus.WeChat_YuLon.common.utils.AssertUtil;
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.StringUtils;
-import com.Zackeus.WeChat_YuLon.common.utils.WXUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.XmlUtil;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 import com.Zackeus.WeChat_YuLon.modules.wechat.config.WxPay;
 import com.Zackeus.WeChat_YuLon.modules.wechat.config.WxPayConfig;
+import com.Zackeus.WeChat_YuLon.modules.wechat.utils.WXUtils;
 
 /**
  * 
@@ -47,15 +47,14 @@ public class WeChatNotifyFilter extends BaseFilter {
 		
 		String returnSign = (String) xmlMap.get(WxPay.SIGN.getWxKey());
 		AssertUtil.isTrue(StringUtils.isNotBlank(returnSign), HttpStatus.SC_BAD_REQUEST, "报文参数缺失");
-		
 		if(StringUtils.equals(WXUtils.SUCCESS_CODE, returnCode)) {
 			//验证签名是否正确
 			Map<String, String> validParams = WXUtils.paraFilter(xmlMap);  //回调验签时需要去除sign和空值参数
 			String sign = WXUtils.sign(WXUtils.createLinkString(validParams), wxPayConfig.getKey());
-			if(!StringUtils.equals(returnSign, sign)) { 
+			if(!StringUtils.equals(returnSign, sign)) {
 				renderXML(response, new XMLResult(WXUtils.FAIL_CODE, "验证失败").toCommonString());
 				return Boolean.FALSE;
-			} 
+			}
 		} else {
 			renderXML(response, new XMLResult(WXUtils.FAIL_CODE, "通信失败").toCommonString());
 			return Boolean.FALSE;
