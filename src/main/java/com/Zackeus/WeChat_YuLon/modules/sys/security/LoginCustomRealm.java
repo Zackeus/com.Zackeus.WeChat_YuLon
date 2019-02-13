@@ -16,7 +16,6 @@ import com.Zackeus.WeChat_YuLon.common.entity.UsernamePasswordToken;
 import com.Zackeus.WeChat_YuLon.common.utils.AssertUtil;
 import com.Zackeus.WeChat_YuLon.common.utils.Encodes;
 import com.Zackeus.WeChat_YuLon.common.utils.JsonMapper;
-import com.Zackeus.WeChat_YuLon.common.utils.Logs;
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.StringUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
@@ -49,7 +48,6 @@ public class LoginCustomRealm extends AuthorizingRealm {
      */
 	@Override  
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) {
-    	Logs.info("*************** 登陆认证 ******************");
     	//令牌——基于用户名和密码的令牌,把AuthenticationToken转换成UsernamePasswordToken
     	UsernamePasswordToken token = (UsernamePasswordToken) authenticationToken;
     	if (token.isWechatLogin()) {
@@ -92,7 +90,6 @@ public class LoginCustomRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-    	Logs.info("获取授权----------------");
     	Principal principal = UserUtils.getPrincipal();
 		if (ObjectUtils.isNotEmpty(principal)) {
 			SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();

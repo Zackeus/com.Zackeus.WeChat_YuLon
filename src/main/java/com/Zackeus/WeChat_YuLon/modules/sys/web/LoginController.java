@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.Zackeus.WeChat_YuLon.common.entity.AjaxResult;
-import com.Zackeus.WeChat_YuLon.common.utils.Logs;
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.WebUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
@@ -45,7 +44,6 @@ public class LoginController extends BaseController {
 	 */
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String login(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
-		Logs.info("loginGet********************************");
 		Principal principal = UserUtils.getPrincipal();
 		// 如果已经登录，则跳转到管理首页
 		return !ObjectUtils.isEmpty(principal) ? "redirect:" + "/sys/area/index" : "modules/sys/login";
