@@ -75,6 +75,7 @@ public class WeChatPayController extends BaseHttpController {
 		// 订单生成
 		WeChatOrder weChatOrder = new WeChatOrder(checkOrderRepayPlan);
 
+//		Integer totalFee = 1;
 		Integer totalFee = WXUtils.createTotalFee(weChatOrder.getOverdueContract().getTotal());
 		AssertUtil.isTrue(0 != totalFee, HttpStatus.SC_INTERNAL_SERVER_ERROR, "系统异常：金额转换失败");
 		weChatOrder.setTotalFee(totalFee);

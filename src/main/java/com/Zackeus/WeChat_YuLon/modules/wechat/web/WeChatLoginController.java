@@ -18,11 +18,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.Zackeus.WeChat_YuLon.common.config.MsgConfig;
 import com.Zackeus.WeChat_YuLon.common.entity.AjaxResult;
+import com.Zackeus.WeChat_YuLon.common.entity.HttpClientResult;
+import com.Zackeus.WeChat_YuLon.common.entity.msg.SMSMag;
 import com.Zackeus.WeChat_YuLon.common.service.valid.Register;
 import com.Zackeus.WeChat_YuLon.common.utils.AssertUtil;
 import com.Zackeus.WeChat_YuLon.common.utils.IdGen;
-import com.Zackeus.WeChat_YuLon.common.utils.Logs;
 import com.Zackeus.WeChat_YuLon.common.utils.ObjectUtils;
+import com.Zackeus.WeChat_YuLon.common.utils.SendMsgUtil;
 import com.Zackeus.WeChat_YuLon.common.utils.StringUtils;
 import com.Zackeus.WeChat_YuLon.common.utils.httpClient.HttpStatus;
 import com.Zackeus.WeChat_YuLon.common.web.BaseHttpController;
@@ -32,6 +34,7 @@ import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatRegister;
 import com.Zackeus.WeChat_YuLon.modules.wechat.entity.WeChatUser;
 import com.Zackeus.WeChat_YuLon.modules.wechat.service.WeChatLoginService;
 import com.Zackeus.WeChat_YuLon.modules.wechat.utils.WXUtils;
+import com.alibaba.fastjson.JSON;
 
 /**
  * 
@@ -63,9 +66,9 @@ public class WeChatLoginController extends BaseHttpController {
 	public void verify(@Validated({ Default.class }) @RequestBody WeChatRegister weChatRegister, HttpSession session,
 			HttpServletRequest request, HttpServletResponse response) {
 
-		weChatRegister.setName("王洁");
-		weChatRegister.setIdCard("610121198909074245");
-		weChatRegister.setPhoneNum("15029673125");
+//		weChatRegister.setName("伍明");
+//		weChatRegister.setIdCard("430722198504308176");
+//		weChatRegister.setPhoneNum("13875043577");
 
 		// 根据待核实身份信息查询符合的合同号列表
 		List<OrderDetail> orderDetails = weChatService.getOrderDetails(weChatRegister);
@@ -80,23 +83,21 @@ public class WeChatLoginController extends BaseHttpController {
 		AssertUtil.isTrue(ObjectUtils.isNotEmpty(weChatUser), HttpStatus.WE_CHAT_REGISTERED_FAIL, "微信信息解密失败, 请重试.");
 
 		String smsCode = IdGen.getRandom(6);
-		Logs.info("短信驗證碼：" + smsCode);
+//		Logs.info("短信驗證碼：" + smsCode);
 
 		// 发送短信验证码
-		// HttpClientResult httpClientResult =
-		// SendMsgUtil.sendSMS(msgConfig.getSmsMsgUrl(),
-		// new SMSMag(msgConfig.getDefaultRequestSys(),
-		// msgConfig.getDefaultRequestSys(), weChatRegister.getName(),
-		// "验证码: " + smsCode + " (5分钟内有效), 请不要将短信验证码透露给他人。",
-		// msgConfig.getDefaultReceiverCompany(),
-		// msgConfig.getDefaultReceiverRole(), null, 1, 60, null, null,
-		// weChatRegister.getPhoneNum(),
-		// msgConfig.getDefaultPlatform()));
-		// AssertUtil.isTrue(HttpStatus.SC_OK == httpClientResult.getCode(),
-		// httpClientResult.getCode(), "发送验证码失败，请重试.");
-		// AssertUtil.isTrue(HttpStatus.SC_SUCCESS ==
-		// JSON.parseObject(httpClientResult.getContent()).getIntValue("Code"),
-		// httpClientResult.getCode(), "发送验证码失败，请重试.");
+		HttpClientResult httpClientResult = SendMsgUtil.sendSMS(msgConfig.getSmsMsgUrl(), new SMSMag(
+				msgConfig.getDefaultRequestSys(),
+				msgConfig.getDefaultRequestSys(), 
+				weChatRegister.getName(),
+				"验证码: " + smsCode + " (5分钟内有效), 请不要将短信验证码透露给他人。",
+				msgConfig.getDefaultReceiverCompany(),
+				msgConfig.getDefaultReceiverRole(), null, 1, 60, null, null,
+				weChatRegister.getPhoneNum(),
+				msgConfig.getDefaultPlatform()));
+		AssertUtil.isTrue(HttpStatus.SC_OK == httpClientResult.getCode(), httpClientResult.getCode(), "发送验证码失败，请重试.");
+		AssertUtil.isTrue(HttpStatus.SC_SUCCESS == JSON.parseObject(httpClientResult.getContent()).getIntValue("Code"), 
+				httpClientResult.getCode(), "发送验证码失败，请重试.");
 
 		weChatRegister.setOrderDetails(orderDetails);
 		weChatRegister.setSmsCode(smsCode);
@@ -121,24 +122,21 @@ public class WeChatLoginController extends BaseHttpController {
 		WeChatUser weChatUser = (WeChatUser) request.getSession().getAttribute(WeChatConfig.WE_CHAT_USER);
 
 		String smsCode = IdGen.getRandom(6);
-		Logs.info("短信驗證碼：" + smsCode);
+//		Logs.info("短信驗證碼：" + smsCode);
 
 		// 发送短信验证码
-		// HttpClientResult httpClientResult =
-		// SendMsgUtil.sendSMS(msgConfig.getSmsMsgUrl(),
-		// new SMSMag(msgConfig.getDefaultRequestSys(),
-		// msgConfig.getDefaultRequestSys(),
-		// weChatUser.getWeChatRegister().getName(), "验证码: " + smsCode + "
-		// (5分钟内有效), 请不要将短信验证码透露给他人。",
-		// msgConfig.getDefaultReceiverCompany(),
-		// msgConfig.getDefaultReceiverRole(), null, 1, 60, null,
-		// null, weChatUser.getWeChatRegister().getPhoneNum(),
-		// msgConfig.getDefaultPlatform()));
-		// AssertUtil.isTrue(HttpStatus.SC_OK == httpClientResult.getCode(),
-		// httpClientResult.getCode(), "发送验证码失败，请重试.");
-		// AssertUtil.isTrue(HttpStatus.SC_SUCCESS ==
-		// JSON.parseObject(httpClientResult.getContent()).getIntValue("Code"),
-		// httpClientResult.getCode(), "发送验证码失败，请重试.");
+		HttpClientResult httpClientResult = SendMsgUtil.sendSMS(msgConfig.getSmsMsgUrl(), new SMSMag(
+				msgConfig.getDefaultRequestSys(),
+				msgConfig.getDefaultRequestSys(),
+				weChatUser.getWeChatRegister().getName(), 
+				"验证码: " + smsCode + "(5分钟内有效), 请不要将短信验证码透露给他人。",
+				msgConfig.getDefaultReceiverCompany(),
+				msgConfig.getDefaultReceiverRole(), null, 1, 60, null, null, 
+				weChatUser.getWeChatRegister().getPhoneNum(),
+				msgConfig.getDefaultPlatform()));
+		AssertUtil.isTrue(HttpStatus.SC_OK == httpClientResult.getCode(), httpClientResult.getCode(), "发送验证码失败，请重试.");
+		AssertUtil.isTrue(HttpStatus.SC_SUCCESS == JSON.parseObject(httpClientResult.getContent()).getIntValue("Code"),
+				httpClientResult.getCode(), "发送验证码失败，请重试.");
 
 		// 更新注册信息
 		weChatUser.getWeChatRegister().setSmsCode(smsCode);
